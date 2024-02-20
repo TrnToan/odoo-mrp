@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_mrp_production_work_order_tree_editable_inherited" model="ir.ui.view">
+        <field name="name">mrp.production.work.order.tree.editable.inherited</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_editable_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="no_priority_wo"/>
+                <field name="get_customer"/>
+                <field name="get_product_id"/>
+            </xpath>
+            <xpath expr="//field[@name='workcenter_id']" position="after">
+                <field name="get_mold"/>
+                <field name="get_date_deadline"/>
+                <field name="get_new_delivery_date"/>
+            </xpath>
+            <xpath expr="//field[@name='date_planned_finished']" position="after">
+                <field name="lateness"/>
+                <field name="get_quantity"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='duration']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_production_work_order_tree_inherited" model="ir.ui.view">
+        <field name="name">mrp.production.work.order.tree.inherited</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <header>
+                    <button name="button_set_finished_to_ready" type="object" string="Set Finished to Ready"/>
+                </header>
+            </xpath>
+            <xpath expr="//field[@name='production_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_production_work_order_form_inherited" model="ir.ui.view">
+        <field name="name">mrp.production.work.order.form.inherited</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='workcenter_id']" position="replace">
+                <xpath expr="//field[@name='workcenter_id']" position="before">
+                    <group>
+                        <group>
+                            <label for="no_priority_wo" string="Priority: "/>
+                            <div class="o_row">
+                                <field name="no_priority_wo"/>
+                            </div>
+                            <label for="get_customer" string="Customer: "/>
+                            <div class="o_row">
+                                <field name="get_customer"/>
+                            </div>
+                            <label for="get_date_deadline" string="Deadline: "/>
+                            <div class="o_row">
+                                <field name="get_date_deadline"/>
+                            </div>
+                            <label for="lateness" string="Lateness: "/>
+                            <div class="o_row">
+                                <field name="lateness"/>
+                            </div>
+                            <label for="workcenter_id" string="Work Center: "/>
+                            <div class="o_row">
+                                <field name="workcenter_id"/>
+                            </div>
+                            <label for="get_product_id" string="Product ID: "/>
+                            <div class="o_row">
+                                <field name="get_product_id"/>
+                            </div>
+                            <label for="get_quantity" string="Quantity: "/>
+                            <div class="o_row">
+                                <field name="get_quantity"/>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="change_priority" string="Change Priority: "/>
+                            <div class="o_row">
+                                <field name="change_priority"/>
+                            </div>
+                            <label for="change_customer" string="Change Customer: "/>
+                            <div class="o_row">
+                                <field name="change_customer"/>
+                            </div>
+                            <label for="change_workcenter" string="Change Work Center: "/>
+                            <div class="o_row">
+                                <field name="change_workcenter"/>
+                            </div>
+                            <label for="change_product" string="Change Product: "/>
+                            <div class="o_row">
+                                <field name="change_product"/>
+                            </div>
+<!--                            <button name="action_change_plan" type="object" string="Change" class="btn-primary"/>-->
+                        </group>
+                    </group>
+                </xpath>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.actions.server" id="action_view_gantt">
+       <field name="name">View Gantt Chart</field>
+       <field name="model_id" ref="model_mrp_workorder"/>
+       <field name="binding_model_id" ref="model_mrp_workorder"/>
+       <field name="binding_view_types">list</field>
+       <field name="state">code</field>
+       <field name="code">
+           action = records.view_gantt()
+       </field>
+    </record>
+
+    <record id="mrp_workorder_view_timeline" model="ir.ui.view">
+        <field name="name">mrp.workorder.view.timeline</field>
+        <field name="model">mrp.workorder</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <timeline date_start="date_planned_start"
+                      date_stop="date_planned_finished"
+                      default_group_by="workcenter_id"
+                      zoomKey="ctrlKey"
+                      mode="fit"
+                      stack="false"
+                      colors="#ff0000: lateness > 0;"
+                      event_open_popup="true">
+                <field name="no_priority_wo"/>
+                <field name="get_customer"/>
+                <field name="get_product_id"/>
+                <templates>
+                    <t t-name="timeline-item">
+                        <div class="o_project_timeline_item">
+                            <span name="name">
+                                <t t-esc="record.no_priority_wo"/> - <t t-esc="record.get_customer"/> - <t t-esc="record.get_product_id"/>
+                            </span>
+                        </div>
+                    </t>
+                </templates>
+            </timeline>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="mrp.mrp_workorder_todo">
+        <field name="view_mode">timeline,tree,kanban,form,calendar,pivot,graph,gantt</field>
+    </record>
+
+</odoo>

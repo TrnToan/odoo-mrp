@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_quotation_tree_with_onboarding_inherited" model="ir.ui.view">
+        <field name="name">quotation.tree.with.onboarding.inherited</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <header>
+                    <button name="button_set_to_quotation" type="object" string="Set to Quotation"/>
+                    <button name="button_confirm" type="object" string="Confirm"/>
+                    <button name="button_cancel" type="object" string="Cancel"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_quotation_tree_inherited" model="ir.ui.view">
+        <field name="name">quotation.tree.inherited</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_untaxed']" position="before">
+                <field name="sum_quantity"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+
+

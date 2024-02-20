@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_planning_date_start,access.planning.date.start,model_planning_date_start,,1,1,1,1
+access_scheduling_date_start,access.scheduling.date.start,model_scheduling_date_start,,1,1,1,1

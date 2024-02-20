@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<odoo>
+        <record id="scheduling_date_start_view_form" model="ir.ui.view">
+            <field name="name">scheduling.date.start.form</field>
+            <field name="model">scheduling.date.start</field>
+            <field name="arch" type="xml">
+                <form string="Scheduling Date Start">
+                    <group>
+                        <field name="first_date_start" required="1"/>
+                    </group>
+                    <footer>
+                        <button name="scheduling" string="Scheduling" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_scheduling_date_start" model="ir.actions.act_window">
+            <field name="name">Scheduling Date Start</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">scheduling.date.start</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="scheduling_date_start_view_form"/>
+            <field name="target">new</field>
+        </record>
+</odoo>
