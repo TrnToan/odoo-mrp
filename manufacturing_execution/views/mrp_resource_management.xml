@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="action_equipment" model="ir.actions.act_window">
+        <field name="name">Equipment</field>
+        <field name="res_model">equipment.equipment</field>
+        <field name="view_mode">tree,form</field>
+         <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Click to Create New Equipment
+            </p>
+        </field>
+    </record>
+
+    <record id="view_equipments_tree" model="ir.ui.view">
+        <field name="name">equipment.equipment.tree</field>
+        <field name="model">equipment.equipment</field>
+        <field name="arch" type="xml">
+            <tree sample="1">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="description"/>
+                <field name="workcenter_id"/>
+                <field name="equipment_type_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_equipments_form" model="ir.ui.view">
+        <field name="name">equipment.equipment.form</field>
+        <field name="model">equipment.equipment</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="workcenter_id"/>
+                    <field name="equipment_type_id"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_resource_management_root"
+              name="Resources"
+              parent="mrp.menu_mrp_root"
+              sequence="30"/>
+
+    <menuitem id="menu_mrp_equipment"
+              name="Equipment"
+              parent="menu_resource_management_root"
+              action="action_equipment"/>
+
+</odoo>

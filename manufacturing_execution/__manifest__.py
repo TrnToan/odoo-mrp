@@ -19,6 +19,7 @@
         'views/sale_order_scheduling.xml',
         'views/mrp_routing_workcenter_scheduling.xml',
         'views/mrp_workorder_scheduling.xml',
+        'views/mrp_resource_management.xml',
     ],
     'demo': [],
     'qweb': [],

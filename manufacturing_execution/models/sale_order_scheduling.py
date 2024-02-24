@@ -18,7 +18,7 @@ class SaleOrder(models.Model):
     def _cal_commitment_date(self):
         for rec in self:
             if rec.commitment_date:
-                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
                 commitment_date = pytz.utc.localize(rec.commitment_date).astimezone(user_tz)
                 rec.new_commitment_date = commitment_date.date()
             else:

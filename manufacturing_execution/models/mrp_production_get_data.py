@@ -39,7 +39,7 @@ class MrpProduction(models.Model):
 
     def get_mo_release_date(self, first_date_first):
         mo_release_date = []
-        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
         date_start = pytz.utc.localize(first_date_first).astimezone(user_tz)
         for rec in self:
             if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):

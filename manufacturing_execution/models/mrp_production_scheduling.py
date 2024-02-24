@@ -41,7 +41,7 @@ class MrpProduction(models.Model):
     def _cal_new_delivery_date(self):
         for rec in self:
             if rec.date_planned_finished:
-                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
                 date_planned_finished = pytz.utc.localize(rec.date_planned_finished).astimezone(user_tz)
                 rec.new_delivery_date = date_planned_finished.date() + datetime.timedelta(days=3)
             else:
@@ -51,7 +51,7 @@ class MrpProduction(models.Model):
     def _cal_date_deadline(self):
         for rec in self:
             if rec.date_deadline:
-                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
                 date_deadline = pytz.utc.localize(rec.date_deadline).astimezone(user_tz)
                 rec.new_date_deadline = date_deadline.date()
             else:
@@ -61,7 +61,7 @@ class MrpProduction(models.Model):
     def _cal_lateness(self):
         for rec in self:
             if rec.new_delivery_date:
-                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
                 date_deadline = pytz.utc.localize(rec.date_deadline).astimezone(user_tz)
                 lateness = rec.new_delivery_date - date_deadline.date()
                 rec.lateness = lateness.days

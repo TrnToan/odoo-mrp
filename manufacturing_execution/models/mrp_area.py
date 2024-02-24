@@ -9,4 +9,4 @@ class MrpArea(models.Model):
 
     name = fields.Char(string='Area Name', required=True)
     site_id = fields.Many2one('mrp.site', string='Site')
-    workcenter_ids = fields.One2many('mrp.workcenter', 'area_id', string='Work Centers')
+    # workcenter_ids = fields.One2many('mrp.workcenter', 'area_id', string='Workcenters')
