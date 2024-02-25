@@ -20,6 +20,8 @@
         'views/mrp_routing_workcenter_scheduling.xml',
         'views/mrp_workorder_scheduling.xml',
         'views/mrp_resource_management.xml',
+        'views/mrp_workcenter_inherited_view.xml',
+        'views/mrp_site.xml',
     ],
     'demo': [],
     'qweb': [],

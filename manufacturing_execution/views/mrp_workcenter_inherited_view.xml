@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_form_mrp_workcenter_inherited" model="ir.ui.view">
+        <field name="name">mrp.workcenter.form.inherited</field>
+        <field name="model">mrp.workcenter</field>
+        <field name="inherit_id" ref="mrp.mrp_workcenter_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='general_info']" position="after">
+                <page string="Associated Equipments" name="associated_equipments">
+                    <field name="equipment_ids" widget="one2many_tags">
+                            <tree name="equipment_tree_view" editable="bottom">
+                                <field name="code"/>
+                                <field name="name"/>
+                                <field name="equipment_type_id"/>
+                            </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//page[@name='general_info']" position="after">
+                <page string="Hierarchy" name="hierarchy">
+                    <form>
+                        <group>
+                            <field name="area_id" string="Related Area"/>
+                            <field name="site_id" string="Related Site"/>
+                        </group>
+                    </form>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

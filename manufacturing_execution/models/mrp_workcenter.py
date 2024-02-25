@@ -8,3 +8,4 @@ class MrpWorkcenter(models.Model):
 
     equipment_ids = fields.One2many('equipment.equipment', 'workcenter_id', string="Equipments")
     area_id = fields.Many2one('mrp.area', string='Area')
+    site_id = fields.Char(related='area_id.site_id.name', string='Site')

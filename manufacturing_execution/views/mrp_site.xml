@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="action_mrp_site" model="ir.actions.act_window">
+        <field name="name">Sites</field>
+        <field name="res_model">mrp.site</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Create the first site
+            </p>
+        </field>
+    </record>
+
+    <record id="view_form_mrp_site" model="ir.ui.view">
+        <field name="name">mrp.site.form</field>
+        <field name="model">mrp.site</field>
+        <field name="arch" type="xml">
+            <form string="Site">
+                <group>
+                    <field name="name"/>
+                    <field name="company_id"/>
+                </group>
+                <notebook>
+                    <page string="Site's Areas" name="Related Areas">
+                        <field name="area_ids"/>
+                            <tree>
+                                <field name="name"/>
+                            </tree>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tree_mrp_site" model="ir.ui.view">
+        <field name="name">mrp.site.tree</field>
+        <field name="model">mrp.site</field>
+        <field name="arch" type="xml">
+            <tree string="Sites">
+                <field name="name"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="menu_mrp_site"
+              name="Sites"
+              parent="mrp.menu_mrp_configuration"
+              action="action_mrp_site"/>
+</odoo>
+
+
