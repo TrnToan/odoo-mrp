@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="action_res_company" model="ir.actions.act_window">
+        <field name="name">Companies</field>
+        <field name="res_model">res.company</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent-create">Create a new company</p>
+        </field>
+    </record>
+
+    <record id="res_company_view_form" model="ir.ui.view">
+        <field name="name">res.company.form</field>
+        <field name="model">res.company</field>
+        <field name="arch" type="xml">
+            <form string="Company">
+                <group>
+                    <field name="name"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_company_view_tree" model="ir.ui.view">
+        <field name="name">res.company.tree</field>
+        <field name="model">res.company</field>
+        <field name="arch" type="xml">
+            <tree string="Companies">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="menu_res_company"
+              name="Companies"
+              parent="mrp.menu_mrp_configuration"
+              action="action_res_company"
+              sequence="2"/>
+</odoo>

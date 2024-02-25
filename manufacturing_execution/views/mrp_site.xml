@@ -24,9 +24,6 @@
                 <notebook>
                     <page string="Site's Areas" name="Related Areas">
                         <field name="area_ids"/>
-                            <tree>
-                                <field name="name"/>
-                            </tree>
                     </page>
                 </notebook>
             </form>
@@ -49,5 +46,4 @@
               parent="mrp.menu_mrp_configuration"
               action="action_mrp_site"/>
 </odoo>
-
 

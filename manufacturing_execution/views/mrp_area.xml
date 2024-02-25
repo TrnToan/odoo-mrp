@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="action_mrp_area" model="ir.actions.act_window">
+        <field name="name">Areas</field>
+        <field name="res_model">mrp.area</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Create the first area
+            </p>
+        </field>
+    </record>
+
+    <record id="view_form_mrp_area" model="ir.ui.view">
+        <field name="name">mrp.area.form</field>
+        <field name="model">mrp.area</field>
+        <field name="arch" type="xml">
+            <form string="Site">
+                <group>
+                    <field name="name"/>
+                </group>
+                <group>
+                    <field name="site_id"/>
+                </group>
+                <notebook>
+                    <page string="Area's Work Centers" name="Related Areas">
+                        <field name="workcenter_ids"/>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tree_mrp_area" model="ir.ui.view">
+        <field name="name">mrp.area.tree</field>
+        <field name="model">mrp.area</field>
+        <field name="arch" type="xml">
+            <tree string="Sites">
+                <field name="name"/>
+                <field name="site_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="menu_mrp_area"
+              name="Areas"
+              parent="mrp.menu_mrp_configuration"
+              action="action_mrp_area"/>
+</odoo>

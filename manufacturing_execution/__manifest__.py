@@ -22,6 +22,8 @@
         'views/mrp_resource_management.xml',
         'views/mrp_workcenter_inherited_view.xml',
         'views/mrp_site.xml',
+        'views/mrp_area.xml',
+        'views/res_company.xml'
     ],
     'demo': [],
     'qweb': [],

@@ -17,11 +17,12 @@
                 </page>
             </xpath>
             <xpath expr="//page[@name='general_info']" position="after">
-                <page string="Hierarchy" name="hierarchy">
+                <page string="Belong to" name="hierarchy">
                     <form>
                         <group>
-                            <field name="area_id" string="Related Area"/>
+                            <field name="enterprise_id" string="Related Enterprise"/>
                             <field name="site_id" string="Related Site"/>
+                            <field name="area_id" string="Related Area"/>
                         </group>
                     </form>
                 </page>

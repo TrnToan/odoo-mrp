@@ -3,3 +3,6 @@ access_planning_date_start,access.planning.date.start,model_planning_date_start,
 access_scheduling_date_start,access.scheduling.date.start,model_scheduling_date_start,,1,1,1,1
 access_equipment_type,access.equipment.type,model_equipment_type,,1,1,1,1
 access_equipment_equipment,access.equipment.equipment,model_equipment_equipment,,1,1,1,1
+access_mrp_site,access.mrp.site,model_mrp_site,,1,1,1,1
+access_mrp_area,access.mrp.area,model_mrp_area,,1,1,1,1
+access_mrp_workcenter,access.mrp.workcenter,model_mrp_workcenter,,1,1,1,1
