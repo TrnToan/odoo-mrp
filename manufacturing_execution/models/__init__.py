@@ -10,3 +10,4 @@ from . import equipment
 from . import equipment_type
 from . import mrp_site
 from . import mrp_area
+from . import mrp_workcenter
