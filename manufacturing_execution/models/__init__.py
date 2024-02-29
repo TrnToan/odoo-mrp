@@ -6,8 +6,9 @@ from . import mrp_routing_workcenter_scheduling
 from . import mrp_workorder_scheduling
 from . import mrp_change_date_planned_start
 from . import mrp_production_get_data
-from . import equipment
+from . import equipment_equipment
 from . import equipment_type
 from . import mrp_site
 from . import mrp_area
 from . import mrp_workcenter
+from . import equipment_property

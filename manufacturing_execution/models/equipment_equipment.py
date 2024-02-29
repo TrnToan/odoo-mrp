@@ -14,3 +14,4 @@ class Equipment(models.Model):
     description = fields.Text(string="Description")
     workcenter_id = fields.Many2one('mrp.workcenter', string="Work Center")
     equipment_type_id = fields.Many2one('equipment.type', string="Equipment Type")
+    equipment_property_ids = fields.One2many('equipment.property', 'equipment_id', string="Equipment Property")

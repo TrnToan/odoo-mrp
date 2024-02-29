@@ -5,9 +5,20 @@
         <field name="name">Equipment</field>
         <field name="res_model">equipment.equipment</field>
         <field name="view_mode">tree,form</field>
-         <field name="help" type="html">
+        <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Click to Create New Equipment
+            </p>
+        </field>
+    </record>
+
+    <record id="action_equipment_type" model="ir.actions.act_window">
+        <field name="name">Equipment Type</field>
+        <field name="res_model">equipment.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Click to Create New Equipment Type
             </p>
         </field>
     </record>
@@ -31,14 +42,41 @@
         <field name="model">equipment.equipment</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <field name="code"/>
-                    <field name="name"/>
-                    <field name="description"/>
-                    <field name="workcenter_id"/>
-                    <field name="equipment_type_id"/>
-                </group>
+                <sheet>
+                    <group>
+                        <field name="code"/>
+                        <field name="name"/>
+                        <field name="description"/>
+                        <field name="workcenter_id"/>
+                        <field name="equipment_type_id"/>
+                    </group>
+                </sheet>
+                <sheet>
+                    <notebook>
+                        <page string="Equipment's properties">
+                            <field name="equipment_property_ids" widget="one2many_list">
+                                <tree editable="bottom">
+                                    <field name="property_id"/>
+                                    <field name="description"/>
+                                    <field name="property_value_string"/>
+                                    <field name="property_value_type"/>
+                                    <field name="property_value_unit"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="view_equipment_type_tree" model="ir.ui.view">
+        <field name="name">equipment.type.tree</field>
+        <field name="model">equipment.type</field>
+        <field name="arch" type="xml">
+            <tree sample="1">
+                <field name="name"/>
+            </tree>
         </field>
     </record>
 
@@ -46,6 +84,11 @@
               name="Resources"
               parent="mrp.menu_mrp_root"
               sequence="30"/>
+
+    <menuitem id="menu_mrp_equipment_type"
+              name="Equipment Type"
+              parent="menu_resource_management_root"
+              action="action_equipment_type"/>
 
     <menuitem id="menu_mrp_equipment"
               name="Equipment"
