@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+
     <record id="product_template_common_form_inherited" model="ir.ui.view">
         <field name="name">product.template.common.form.inherited</field>
         <field name="model">product.template</field>
@@ -7,6 +8,13 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='categ_id']" position="before">
                 <field name="mold"/>
+            </xpath>
+            <xpath expr="//page[@name='general_information']" position='after'>
+                <page string="Variants">
+                    <group>
+                        <field name="product_product_ids" widget="one2many_tags"/>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>
@@ -21,4 +29,5 @@
             </xpath>
         </field>
     </record>
+
 </odoo>

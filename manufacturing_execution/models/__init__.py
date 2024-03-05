@@ -12,3 +12,8 @@ from . import mrp_site
 from . import mrp_area
 from . import mrp_workcenter
 from . import equipment_property
+from . import product_category_group
+from . import product_category
+from . import product_template_property
+from . import mrp_production_record
+from . import resource_network_connection

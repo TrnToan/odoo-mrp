@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="view_product_template_import" model="ir.ui.view">
+            <field name="name">product.template.import.form</field>
+            <field name="model">product.template.import</field>
+            <field name="arch" type="xml">
+                <form string="Import Product Templates">
+                    <group>
+                        <field name="file_name" invisible="0" />
+                        <field name="import_file" widget="binary" filename="File" string="File" />
+                    </group>
+                    <footer>
+                        <button string="Import products" type="object" name="button_import_product_tmpl_xlxs" class="btn-primary" />
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

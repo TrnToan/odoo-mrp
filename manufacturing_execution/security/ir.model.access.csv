@@ -7,3 +7,7 @@ access_mrp_site,access.mrp.site,model_mrp_site,,1,1,1,1
 access_mrp_area,access.mrp.area,model_mrp_area,,1,1,1,1
 access_mrp_workcenter,access.mrp.workcenter,model_mrp_workcenter,,1,1,1,1
 access_equipment_property,access.equipment.property,model_equipment_property,,1,1,1,1
+access_product_template_property,access.product.template.property,model_product_template_property,,1,1,1,1
+access_product_category_group,access.product.category.group,model_product_category_group,,1,1,1,1
+access_product_template_import,access.product.template.import,model_product_template_import,,1,1,1,1
+access_resource_network_connection,access.resource.network.connection,model_resource_network_connection,,1,1,1,1
