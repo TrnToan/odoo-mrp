@@ -20,7 +20,6 @@
                 <page string="Belong to" name="hierarchy">
                     <form>
                         <group>
-                            <field name="enterprise_id" string="Related Enterprise"/>
                             <field name="site_id" string="Related Site"/>
                             <field name="area_id" string="Related Area"/>
                         </group>

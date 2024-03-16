@@ -9,7 +9,7 @@ import plotly
 import pandas as pd
 
 
-# Cập nhật dữ liệu lên Work Orders, bổ sung biểu đồ Gantt. Operation --> Work Orders
+# Update dữ liệu lên Work Orders, bổ sung Gantt chart. Operation --> Work Orders
 class MrpWorkorder(models.Model):
     _inherit = "mrp.workorder"
 
@@ -22,10 +22,6 @@ class MrpWorkorder(models.Model):
     get_customer = fields.Char(string='Customer', store=True, related='production_id.get_customer')
     get_date_deadline = fields.Date(string='Date Deadline', store=True, related='production_id.new_date_deadline')
     get_quantity = fields.Float(string='Quantity', store=True, related='production_id.product_qty')
-    change_priority = fields.Integer(string='Change Priority')
-    change_customer = fields.Char(string='Change Customer')
-    change_workcenter = fields.Char(string='Change Work Center')
-    change_product = fields.Char(string='Change Product')
 
     def button_set_finished_to_ready(self):
         for rec in self:
@@ -38,20 +34,6 @@ class MrpWorkorder(models.Model):
         for workorder in get_workorder:
             super(MrpWorkorder, workorder)._onchange_expected_duration()
         return True
-
-    @api.onchange('change_priority')
-    def onchange_change_priority(self):
-        if self.change_priority > 0 and self.change_priority != self.no_priority_wo:
-            work_orders = self.env['mrp.workorder'].search([])
-            for rec in work_orders:
-                if rec.no_priority_wo == self.change_priority:
-                    self.change_customer = rec.get_customer
-                    self.change_workcenter = rec.workcenter_id.name
-                    self.change_product = rec.get_product_id
-        else:
-            self.change_customer = None
-            self.change_workcenter = None
-            self.change_product = None
 
     def change_local_time(self, time):
         user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
@@ -88,10 +70,12 @@ class MrpWorkorder(models.Model):
                       work_orders if work_order.date_planned_start]
         date_finish = [self.change_local_time(work_order.date_planned_finished).strftime('%Y-%m-%d %H:%M') for
                        work_order in work_orders if work_order.date_planned_start]
-        all_info = {'Work Center': work_center,
-                    'Date Start': date_start,
-                    'Date Finish': date_finish,
-                    'Operation': operation}
+        all_info = {
+            'Work Center': work_center,
+            'Date Start': date_start,
+            'Date Finish': date_finish,
+            'Operation': operation
+        }
         data = pd.DataFrame(all_info)
         fig = px.timeline(data, title=new_title, x_start=data['Date Start'], x_end=data['Date Finish'],
                           y=data['Work Center'], color=data['Operation'])

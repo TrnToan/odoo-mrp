@@ -12,6 +12,9 @@ class MrpProduction(models.Model):
     _inherit = "mrp.production"
 
     def clear_all(self):
+        """
+        Clears the no_priority_mo of all MOs.
+        """
         get_all = self.env['mrp.production'].search([])
         for rec in get_all:
             rec.no_priority_mo = 0
@@ -37,10 +40,10 @@ class MrpProduction(models.Model):
                 mo_weight.append(rec.weight_so)
         return mo_weight
 
-    def get_mo_release_date(self, first_date_first):
+    def get_mo_release_date(self, first_date_start):
         mo_release_date = []
-        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
-        date_start = pytz.utc.localize(first_date_first).astimezone(user_tz)
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+        date_start = pytz.utc.localize(first_date_start).astimezone(user_tz)
         for rec in self:
             if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):
                 if rec.release_date:
@@ -52,10 +55,10 @@ class MrpProduction(models.Model):
         return mo_release_date
 
     # Được tính bằng thời gian hạn sản xuất trừ cho thời gian bắt đầu (First Date Start)
-    def get_mo_due_date(self, first_date_first):
+    def get_mo_due_date(self, first_date_start):
         mo_due_date = []
-        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
-        date_start = pytz.utc.localize(first_date_first).astimezone(user_tz)
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+        date_start = pytz.utc.localize(first_date_start).astimezone(user_tz)
         for rec in self:
             if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):
                 deadline = pytz.utc.localize(rec.date_deadline_manufacturing).astimezone(user_tz)
@@ -90,4 +93,3 @@ class MrpProduction(models.Model):
             if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):
                 mo_duration_expected.append(rec.production_duration_expected)
         return mo_duration_expected
-
