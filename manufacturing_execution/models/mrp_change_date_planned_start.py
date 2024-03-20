@@ -46,7 +46,7 @@ class MrpProduction(models.Model):
             mo_bom.append(rec.bom_id.code)
             routing = rec.env['mrp.routing.workcenter'].search([('bom_id.code', '=', rec.bom_id.code)])
             mo_workcenter.append(routing.workcenter_id.name)
-            mo_mold.append(rec.get_mold)
+            # mo_mold.append(rec.get_mold)
             mo_release_date.append(self.get_date(rec.release_date))
             mo_date_planned_start.append(self.get_date(rec.date_planned_start))
             mo_date_planned_finish.append(self.get_date(rec.date_planned_finished))
@@ -83,7 +83,7 @@ class MrpProduction(models.Model):
         """
         Chuyển format date sang local datetime
         """
-        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
         local_date_planned_start = user_tz.localize(date)
         utc_date_planned_start = local_date_planned_start.astimezone(pytz.utc)
         str_date_planned_start = utc_date_planned_start.strftime("%Y-%m-%d %H:%M:%S")

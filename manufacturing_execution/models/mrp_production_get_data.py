@@ -42,7 +42,7 @@ class MrpProduction(models.Model):
 
     def get_mo_release_date(self, first_date_start):
         mo_release_date = []
-        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
         date_start = pytz.utc.localize(first_date_start).astimezone(user_tz)
         for rec in self:
             if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):
@@ -57,7 +57,7 @@ class MrpProduction(models.Model):
     # Được tính bằng thời gian hạn sản xuất trừ cho thời gian bắt đầu (First Date Start)
     def get_mo_due_date(self, first_date_start):
         mo_due_date = []
-        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
         date_start = pytz.utc.localize(first_date_start).astimezone(user_tz)
         for rec in self:
             if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):
@@ -67,11 +67,7 @@ class MrpProduction(models.Model):
         return mo_due_date
 
     def get_mo_mold(self):
-        mo_mold = []
-        for rec in self:
-            if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):
-                mo_mold.append(rec.get_mold)
-        return mo_mold
+        pass
 
     def get_mo_price(self):
         mo_price = []

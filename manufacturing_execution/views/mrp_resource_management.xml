@@ -50,6 +50,8 @@
                         <field name="name"/>
                         <field name="description"/>
                         <field name="workcenter_id"/>
+                        <field name="total_quantity"/>
+                        <field name="available_quantity"/>
                         <field name="equipment_type_id"/>
                     </group>
                 </sheet>

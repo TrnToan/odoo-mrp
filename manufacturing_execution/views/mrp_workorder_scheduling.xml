@@ -11,7 +11,6 @@
                 <field name="get_product_id"/>
             </xpath>
             <xpath expr="//field[@name='workcenter_id']" position="after">
-                <field name="get_mold"/>
                 <field name="get_date_deadline"/>
                 <field name="get_new_delivery_date"/>
             </xpath>
@@ -81,25 +80,6 @@
                             <div class="o_row">
                                 <field name="get_quantity"/>
                             </div>
-                        </group>
-                        <group>
-                            <label for="change_priority" string="Change Priority: "/>
-                            <div class="o_row">
-                                <field name="change_priority"/>
-                            </div>
-                            <label for="change_customer" string="Change Customer: "/>
-                            <div class="o_row">
-                                <field name="change_customer"/>
-                            </div>
-                            <label for="change_workcenter" string="Change Work Center: "/>
-                            <div class="o_row">
-                                <field name="change_workcenter"/>
-                            </div>
-                            <label for="change_product" string="Change Product: "/>
-                            <div class="o_row">
-                                <field name="change_product"/>
-                            </div>
-<!--                            <button name="action_change_plan" type="object" string="Change" class="btn-primary"/>-->
                         </group>
                     </group>
                 </xpath>

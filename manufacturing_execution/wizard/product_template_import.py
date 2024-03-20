@@ -42,6 +42,9 @@ class ProductTemplateImport(models.TransientModel):
 
         product_tmpl_ids = []
         for line in import_lines:
+            if not self.check_mold_existence(line['Mold']):
+                raise exceptions.UserError("Mold " + line['Mold'] + " does not exist")
+
             categ_id = self.env['product.category'].search([('name', '=', line['Product Category'])], limit=1).id
             route_id = self.env['stock.location.route'].search([('name', '=', line['Routes'])], limit=1).id
             product_tmpl_ids.append(self.env['product.template'].create({
@@ -71,3 +74,8 @@ class ProductTemplateImport(models.TransientModel):
             'domain': [('id', 'in', [product_tmpl.id for product_tmpl in product_tmpl_ids])],
         }
         return action
+
+    def check_mold_existence(self, mold):
+        if not self.env['equipment.equipment'].search([('name', '=', mold)]):
+            return False
+        return True

@@ -16,8 +16,6 @@ class MrpProduction(models.Model):
     no_priority_mo = fields.Integer(string='No.', default=0, store=True, help="The priority of the MO")
     get_category_id = fields.Many2one('product.category', 'Category', related='product_id.categ_id', store=True)
     get_list_price = fields.Float(string='Price', related='product_id.list_price')
-    # Trường mold này sẽ bỏ thay băng trường char get_mold_in_use lấy từ ResourceNetworkConnection
-    get_mold = fields.Char(string="Mold", related='product_id.product_tmpl_id.mold')
     get_mold_in_use = fields.Char(string="Mold in Use", compute='_get_mold_in_use')
     release_date = fields.Datetime(string='Release Date',
                                    help="Date on which all the material needed for poduction is ready")
@@ -31,9 +29,9 @@ class MrpProduction(models.Model):
     @api.depends('product_id')
     def _get_mold_in_use(self):
         for rec in self:
-            rec.get_mold_in_use = (rec.env['resource.network.connection']
-                                   .search([('from_resource_id', '=', rec.product_id.product_tmpl_id.name)])
-                                   .to_resource_id)
+            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.name)], limit=1)
+            if mold:
+                rec.get_required_mold = mold.to_resource_id
 
     @api.depends('date_deadline')
     def _cal_deadline_manufacturing(self):
@@ -53,7 +51,7 @@ class MrpProduction(models.Model):
     def _cal_new_delivery_date(self):
         for rec in self:
             if rec.date_planned_finished:
-                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
                 date_planned_finished = pytz.utc.localize(rec.date_planned_finished).astimezone(user_tz)
                 rec.new_delivery_date = date_planned_finished.date() + datetime.timedelta(days=3)
 
@@ -64,7 +62,7 @@ class MrpProduction(models.Model):
         """
         for rec in self:
             if rec.date_deadline:
-                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz)
+                user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
                 date_deadline = pytz.utc.localize(rec.date_deadline).astimezone(user_tz)
                 rec.new_date_deadline = date_deadline.date()
 

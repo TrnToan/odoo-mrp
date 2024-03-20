@@ -14,7 +14,7 @@ class MrpWorkorder(models.Model):
     _inherit = "mrp.workorder"
 
     no_priority_wo = fields.Integer(string='No.', related='production_id.no_priority_mo', store=True)
-    get_mold = fields.Char(string="Mold", related='product_id.mold')
+    get_mold_in_use = fields.Char(string="Mold", compute='_get_mold_in_use')
     lateness = fields.Integer(string="Lateness", related="production_id.lateness", store=True)
     get_product_id = fields.Char(string="Product ID", related='production_id.product_id.default_code', store=True)
     get_new_delivery_date = fields.Date(string='New Delivery Date', related='production_id.new_delivery_date',
@@ -27,6 +27,13 @@ class MrpWorkorder(models.Model):
         for rec in self:
             if rec.state == "done":
                 rec.state = "ready"
+
+    @api.depends('product_id')
+    def _get_mold_in_use(self):
+        for rec in self:
+            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.name)], limit=1)
+            if mold:
+                rec.get_required_mold = mold.to_resource_id
 
     @api.model
     def update_data(self):
