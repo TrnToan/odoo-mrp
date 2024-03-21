@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="view_product_bom_import" model="ir.ui.view">
+            <field name="name">product.bom.import.form</field>
+            <field name="model">product.bom.import</field>
+            <field name="arch" type="xml">
+                <form string="Import Products BoM">
+                    <group>
+                        <field name="import_file" widget="binary" filename="File" string="File" />
+                    </group>
+                    <footer>
+                        <button string="Import products BoM" type="object" name="button_import_product_bom_xlxs" class="btn-primary" />
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

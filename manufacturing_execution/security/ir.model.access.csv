@@ -11,3 +11,4 @@ access_product_template_property,access.product.template.property,model_product_
 access_product_category_group,access.product.category.group,model_product_category_group,,1,1,1,1
 access_product_template_import,access.product.template.import,model_product_template_import,,1,1,1,1
 access_resource_network_connection,access.resource.network.connection,model_resource_network_connection,,1,1,1,1
+access_product_bom_import,access.product.bom.import,model_product_bom_import,,1,1,1,1

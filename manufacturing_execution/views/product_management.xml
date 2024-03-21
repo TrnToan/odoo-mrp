@@ -23,17 +23,6 @@
         </field>
     </record>
 
-    <record id="action_product_product" model="ir.actions.act_window">
-        <field name="name">Product Variants</field>
-        <field name="res_model">product.product</field>
-        <field name="view_mode">tree,form</field>
-        <field name="help" type="html">
-            <p class="oe_view_nocontent_create">
-                Click to create a new product variant.
-            </p>
-        </field>
-    </record>
-
     <record id="view_product_category_group_form" model="ir.ui.view">
         <field name="name">product.category.group.form</field>
         <field name="model">product.category.group</field>
@@ -60,6 +49,24 @@
                 'res_model': 'product.template.import',
                 'target': 'new',
                 'views': [(env.ref('manufacturing_execution.view_product_template_import').id, 'form')],
+            }
+        </field>
+    </record>
+
+    <record id="server_action_product_bom" model="ir.actions.server">
+        <field name="name">Custom Import Products' BoM</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="product.model_product_category"/>
+        <field name="binding_model_id" ref="product.model_product_category"/>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = {
+                'type': 'ir.actions.act_window',
+                'name': 'Import Products BoM',
+                'res_model': 'product.bom.import',
+                'target': 'new',
+                'views': [(env.ref('manufacturing_execution.view_product_bom_import').id, 'form')],
             }
         </field>
     </record>
@@ -92,12 +99,6 @@
               action="action_product_category"
               parent="mrp.menu_mrp_bom"
               sequence="2"/>
-
-    <menuitem id="menu_product_product"
-              name="Product Variants"
-              action="action_product_product"
-              parent="mrp.menu_mrp_bom"
-              sequence="6"/>
 
 </odoo>
 

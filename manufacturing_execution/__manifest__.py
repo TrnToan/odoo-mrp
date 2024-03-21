@@ -14,6 +14,7 @@
         'wizard/planning_date_start_view.xml',
         'wizard/scheduling_date_start_view.xml',
         'wizard/product_template_import_view.xml',
+        'wizard/product_bom_import_view.xml',
         'views/mrp_production_scheduling.xml',
         'views/res_partner_scheduling.xml',
         'views/product_template_scheduling.xml',
