@@ -69,7 +69,7 @@ class ProductBomImport(models.TransientModel):
             self.env['resource.network.connection'].create({
                 'from_resource_id': product_name,
                 'to_resource_id': line['Operations/Work Center'],
-                'name': product_name + ' is produced at ' + line['Operations/Work Center'],
+                'name': product_name + ' is produced at workcenter ' + line['Operations/Work Center'],
             })
 
         view_id = self.env.ref('mrp.mrp_bom_tree_view').id

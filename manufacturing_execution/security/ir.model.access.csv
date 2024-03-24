@@ -6,6 +6,7 @@ access_equipment_equipment,access.equipment.equipment,model_equipment_equipment,
 access_mrp_site,access.mrp.site,model_mrp_site,,1,1,1,1
 access_mrp_area,access.mrp.area,model_mrp_area,,1,1,1,1
 access_mrp_workcenter,access.mrp.workcenter,model_mrp_workcenter,,1,1,1,1
+access_mrp_production_record,access.mrp.production.record,model_mrp_production_record,,1,1,1,1
 access_equipment_property,access.equipment.property,model_equipment_property,,1,1,1,1
 access_product_template_property,access.product.template.property,model_product_template_property,,1,1,1,1
 access_product_category_group,access.product.category.group,model_product_category_group,,1,1,1,1

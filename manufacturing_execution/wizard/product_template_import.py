@@ -46,7 +46,10 @@ class ProductTemplateImport(models.TransientModel):
                 raise exceptions.UserError("Mold " + line['Mold'] + " does not exist")
 
             categ_id = self.env['product.category'].search([('name', '=', line['Product Category'])], limit=1).id
-            route_id = self.env['stock.location.route'].search([('name', '=', line['Routes'])], limit=1).id
+            route_ids = []
+            for rec in line['Routes'].split(','):
+                route_id = self.env['stock.location.route'].search([('name', '=', rec)], limit=1).id
+                route_ids.append(route_id)
             product_tmpl_ids.append(self.env['product.template'].create({
                 'name': line['Name'],
                 'default_code': line['Internal Reference'],
@@ -55,7 +58,7 @@ class ProductTemplateImport(models.TransientModel):
                 'type': line['Product Type'],
                 'purchase_ok': line['Can be Purchased'],
                 'sale_ok': line['Can be Sold'],
-                'route_ids': [(6, 0, [route_id])],
+                'route_ids': [(6, 0, route_ids)],
                 'description': line['Description'],
             }))
             self.env['resource.network.connection'].create({
