@@ -44,9 +44,15 @@ class MrpProduction(models.Model):
             mo_no.append(rec.no_priority_mo)
             mo_name.append(rec.name)
             mo_bom.append(rec.bom_id.code)
+
             routing = rec.env['mrp.routing.workcenter'].search([('bom_id.code', '=', rec.bom_id.code)])
             mo_workcenter.append(routing.workcenter_id.name)
-            # mo_mold.append(rec.get_mold)
+
+            product = rec.env['product.template'].search([('name', '=', rec.product_id.name)])
+            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', product.name),
+                                                                  ('connection_type', '=', 'product_mold')])
+            mo_mold.append(mold)
+
             mo_release_date.append(self.get_date(rec.release_date))
             mo_date_planned_start.append(self.get_date(rec.date_planned_start))
             mo_date_planned_finish.append(self.get_date(rec.date_planned_finished))
@@ -99,6 +105,7 @@ class MrpProduction(models.Model):
         for i in range(1, job + 1):
             if instance_dict[i]['workcenter'] == instance_dict[job]['workcenter']:
                 find.append(instance_dict[i])
+
         # nếu MO thứ job là MO đầu tiên trên máy này thì
         if len(find) == 1:
             first_date_planned_start = self.first_date_planned_start(first_date_start)

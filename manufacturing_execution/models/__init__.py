@@ -1,4 +1,5 @@
 from . import mrp_production_scheduling
+from . import mrp_production_tabu_search
 from . import res_partner_scheduling
 from . import product_template_scheduling
 from . import sale_order_scheduling
