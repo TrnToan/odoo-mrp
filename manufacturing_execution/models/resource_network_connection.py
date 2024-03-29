@@ -11,6 +11,7 @@ class ResourceNetworkConnection(models.Model):
     from_resource_id = fields.Char(string="From Resource", required=True)
     to_resource_id = fields.Char(string="To Resource", required=True)
     name = fields.Char(string="Name", required=True)
+    connection_type = fields.Char(string="Connection Type")
 
     def init(self):
         super(ResourceNetworkConnection, self).init()

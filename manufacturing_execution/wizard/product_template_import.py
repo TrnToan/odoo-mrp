@@ -65,6 +65,7 @@ class ProductTemplateImport(models.TransientModel):
                 'from_resource_id': line['Name'],
                 'to_resource_id': line['Mold'],
                 'name': line['Name'] + ' is molded from ' + line['Mold'],
+                'connection_type': "product_mold"
             })
 
         view_id = self.env.ref('manufacturing_execution.product_template_product_tree_inherited').id
