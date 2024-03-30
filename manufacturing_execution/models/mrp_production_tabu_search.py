@@ -38,8 +38,7 @@ class MrpProduction(models.Model):
     # 7: {'name': 'WH/MO/00023', 'wj': 2.6, 'mold': 'K039-1', 'rj': 0, 'dj': 34560, 'pj': 2125.85},
     # 8: {'name': 'WH/MO/00022', 'wj': 2.6, 'mold': 'K038', 'rj': 0, 'dj': 36000, 'pj': 2125.85}}
 
-    def get_tenure(self, first_date_start):
-        instance_dict = self.input_data(first_date_start)
+    def get_tenure(self, first_date_start, instance_dict):
         if len(instance_dict) < 10:
             tenure = 31
         elif len(instance_dict) < 20:
@@ -62,19 +61,17 @@ class MrpProduction(models.Model):
             swap = []
         return dict_data
 
-    def get_initial_solution(self, first_date_start):
-        instance_dict = self.input_data(first_date_start)
+    def get_initial_solution(self, first_date_start, instance_dict):
         # pprint(instance_dict)
         n_jobs = len(instance_dict)
         initial_solution = list(range(1, n_jobs+1))
         return initial_solution
 
-    def check_mold(self, job, solution, first_date_start):
-        dict_data = self.input_data(first_date_start)
+    def check_mold(self, job, solution, first_date_start, instance_dict):
         index_solution = solution.index(job)
         if index_solution != len(solution) - 1:
             next_job = solution[index_solution + 1]
-            if dict_data[job]['mold'] != dict_data[next_job]['mold']:  # Kiểm tra khuôn hiện tại có giống khuôn tiếp theo?
+            if instance_dict[job]['mold'] != instance_dict[next_job]['mold']:  # Kiểm tra khuôn hiện tại có giống khuôn tiếp theo?
                 sj = 3 * 60   # 3 hours
             else:
                 sj = 0
@@ -82,31 +79,30 @@ class MrpProduction(models.Model):
             sj = 0
         return sj
 
-    def obj_fun(self, solution, first_date_first):
+    def obj_fun(self, solution, first_date_first, instance_dict):
         """Takes a set of scheduled jobs, dict (input data)
             Return the objective function value of the solution"""
-        dict_data = self.input_data(first_date_first)  # Thu thập dữ liệu
         ts = 0  # Thời gian bắt đầu bằng 0
         objfun_value = 0
         for job in solution:
-            sj = self.check_mold(job, solution, first_date_first)   # Kiểm tra có cần thay khuôn không? Nếu có sj,j+1  + 3 hours
+            sj = self.check_mold(job, solution, first_date_first, instance_dict)   # Kiểm tra có cần thay khuôn không? Nếu có sj,j+1  + 3 hours
             if solution.index(job) == 0:   # Công việc ban đầu
-                te_i = dict_data[job]["rj"] + dict_data[job]["pj"] + sj
+                te_i = instance_dict[job]["rj"] + instance_dict[job]["pj"] + sj
                 # Thời gian kết thúc bằng rj + pj
             elif solution.index(job) > 0:  # Đơn hàng tiếp theo
-                if ts > dict_data[job]["rj"]:
-                    te_i = ts + dict_data[job]["pj"] + sj
-                elif ts <= dict_data[job]["rj"]:
-                    te_i = dict_data[job]["rj"] + dict_data[job]["pj"] + sj
+                if ts > instance_dict[job]["rj"]:
+                    te_i = ts + instance_dict[job]["pj"] + sj
+                elif ts <= instance_dict[job]["rj"]:
+                    te_i = instance_dict[job]["rj"] + instance_dict[job]["pj"] + sj
 
-            d_i = dict_data[job]["dj"]   # Thời gian quá hạn
+            d_i = instance_dict[job]["dj"]   # Thời gian quá hạn
             #T_i = max(0, te_i - d_i)
             L_i = te_i - d_i          # Độ trễ đại số bằng thời gian kết thúc - thời gian quá hạn
             if L_i > 0:
                 u_i = 1.0
             else:
                 u_i = 0.0
-            W_i = dict_data[job]["wj"]
+            W_i = instance_dict[job]["wj"]
 
             objfun_value += W_i * u_i     # Giá trị hàm mục tiêu
             #objfun_value += W_i * T_i
@@ -161,19 +157,19 @@ class MrpProduction(models.Model):
             return best_move, tabu_list
         return tuple(best_move), tabu_list    # Xuất ra được Best Move và Tabu List mới nhất.
 
-    def tabu_search(self, first_date_start):
+    def tabu_search(self, first_date_start, instance_dict):
         """The implementation Tabu Search algorithm with short-term memory and pair swap as Tabu attribute"""
         # Parameters:
-        tenure = self.get_tenure(first_date_start)    # Xác định chiều dài Tabu List.
+        tenure = self.get_tenure(first_date_start, instance_dict)    # Xác định chiều dài Tabu List.
 
         # for test in range(7, 151):
         #     tenure = test
         #     n_terminate = test
 
         tabu_list = [[0, 0] for x in range(0, tenure)]   # Khai báo Tabu List.
-        current_solution = self.get_initial_solution(first_date_start)  # Tạo current solution là lời giải ban đầu.
+        current_solution = self.get_initial_solution(first_date_start, instance_dict)  # Tạo current solution là lời giải ban đầu.
         # return current_solution
-        best_objvalue = self.obj_fun(current_solution, first_date_start)   # Tính giá trị hàm mục tiêu
+        best_objvalue = self.obj_fun(current_solution, first_date_start, instance_dict)   # Tính giá trị hàm mục tiêu
         best_solution = current_solution    # Kết quả điều độ tốt nhất với vòng lặp chạy đầu tiên.
 
         # tabu_list = [[12, 15], [14, 15], [9, 15], [11, 15], [13, 15], [13, 11], [13, 9], [14, 12], [12, 14], [13, 14], [9, 14], [11, 14], [13, 12], [12, 13], [9, 13], [11, 13], [11, 9], [11, 12], [9, 12], [10, 8], [8, 10], [7, 6], [6, 7], [5, 3], [3, 5], [4, 1], [1, 4], [9, 11], [9, 10], [1, 2], [3, 4]]
@@ -190,13 +186,13 @@ class MrpProduction(models.Model):
             # Tạo ra cầu trúc Tabu ứng với từng cặp lân cận sẽ có một giá trị move value (giá trị hàm mục tiêu)
             for move in tabu_structure:
                 candidate_solution = self.swap_move(current_solution, move[0], move[1])
-                candidate_objvalue = self.obj_fun(candidate_solution, first_date_start)
+                candidate_objvalue = self.obj_fun(candidate_solution, first_date_start, instance_dict)
                 tabu_structure[move]['move_value'] = candidate_objvalue
             # Select the move with the lowest ObjValue in the neighborhood (minimization)
             best_move, tabu_list = self.get_best_move(tabu_structure, tabu_list)
             if best_move is not None:
                 current_solution = self.swap_move(current_solution, best_move[0], best_move[1])
-                current_objvalue = self.obj_fun(current_solution, first_date_start)    # Tính lại hàm mục tiêu của best move lấy ở trên
+                current_objvalue = self.obj_fun(current_solution, first_date_start, instance_dict)    # Tính lại hàm mục tiêu của best move lấy ở trên
                 # So sánh với giá trị ham mục tiêu của best move ban đầu.
                 if current_objvalue < best_objvalue:
                     best_solution = current_solution
@@ -215,8 +211,8 @@ class MrpProduction(models.Model):
     # Khi đã ra được best solution, đưa công việc về định dạng ban đầu để thực hiện.
     # Ví dụ: best move = 2 1 3 4 5 -> 1 2 3 4 5
     def order_input_data(self, first_date_start):
-        best = self.tabu_search(first_date_start)  # Tìm ra được kết quả của Tabu Search -> Thứ tự
         instance_dict = self.input_data(first_date_start)  # Lấy dữ liệu đầu vào
+        best = self.tabu_search(first_date_start, instance_dict)  # Tìm ra được kết quả của Tabu Search -> Thứ tự
         order_name = []
         order_weight = []
         order_release_date = []
