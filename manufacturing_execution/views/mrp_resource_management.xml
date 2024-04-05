@@ -30,10 +30,10 @@
             <tree sample="1">
                 <field name="code"/>
                 <field name="name"/>
-                <field name="description"/>
+                <field name="description" optional="hide"/>
                 <field name="total_quantity"/>
                 <field name="available_quantity"/>
-                <field name="workcenter_id"/>
+                <field name="workcenter_id" optional="hide"/>
                 <field name="equipment_type_id"/>
             </tree>
         </field>

@@ -67,7 +67,16 @@ class MrpProduction(models.Model):
         return mo_due_date
 
     def get_mo_mold(self):
-        pass
+        mo_molds = []
+        for rec in self:
+            if (rec.state == 'draft') or (rec.state == 'confirmed') or (rec.state == 'progress'):
+                mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.product_id.name),
+                                                                      ('connection_type', '=', 'product_mold')],
+                                                                     limit=1)
+                if mold:
+                    mo_molds.append(mold.to_resource_id)
+        print(mo_molds)
+        return mo_molds
 
     def get_mo_price(self):
         mo_price = []

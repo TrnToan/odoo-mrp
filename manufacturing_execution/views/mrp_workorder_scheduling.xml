@@ -17,6 +17,9 @@
             <xpath expr="//field[@name='date_planned_finished']" position="after">
                 <field name="lateness"/>
                 <field name="get_quantity"/>
+                <field name="output"/>
+                <field name="scrap"/>
+                <field name="raw_output"/>
             </xpath>
             <xpath expr="//field[@name='name']" position="attributes">
                 <attribute name="optional">hide</attribute>

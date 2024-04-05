@@ -10,5 +10,6 @@ class SchedulingDateStart(models.TransientModel):
     first_date_start = fields.Datetime(string='First Date Start', require=True)
 
     def scheduling(self):
-        result = self.env['mrp.production'].search([])
+        selected_ids = self.env.context.get('active_ids', [])
+        result = self.env['mrp.production'].browse(selected_ids)
         return result.button_scheduling(first_date_start=self.first_date_start)

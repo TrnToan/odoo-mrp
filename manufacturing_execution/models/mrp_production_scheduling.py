@@ -29,7 +29,8 @@ class MrpProduction(models.Model):
     @api.depends('product_id')
     def _get_mold_in_use(self):
         for rec in self:
-            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.name)], limit=1)
+            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.product_id.name),
+                                                                  ('connection_type', '=', 'product_mold')], limit=1)
             if mold:
                 rec.get_required_mold = mold.to_resource_id
 

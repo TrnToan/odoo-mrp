@@ -15,6 +15,7 @@ class ProductTemplate(models.Model):
     @api.depends('name')
     def _get_mold_from_resource_network_connection(self):
         for rec in self:
-            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.name)], limit=1)
+            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.name),
+                                                                  ('connection_type', '=', 'product_mold')], limit=1)
             if mold:
                 rec.get_required_mold = mold.to_resource_id

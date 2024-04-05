@@ -22,6 +22,14 @@ class MrpWorkorder(models.Model):
     get_customer = fields.Char(string='Customer', store=True, related='production_id.get_customer')
     get_date_deadline = fields.Date(string='Date Deadline', store=True, related='production_id.new_date_deadline')
     get_quantity = fields.Float(string='Quantity', store=True, related='production_id.product_qty')
+    output = fields.Float(string='Output', compute='_compute_output_from_records',
+                          help="The number of products produced that meets the standard")
+    scrap = fields.Float(string='Scrap', compute='_compute_scrap_from_records',
+                         help="The number of products that are not up to standard")
+    raw_output = fields.Float(string='Raw Output', compute='_compute_raw_output',
+                              help="The total number of products produced")
+    production_records = fields.One2many('mrp.production.record', 'workorder_id', string='Production Records')
+    associated_equipments = fields.Char(string='Associated Equipments', compute='_get_associated_equipments', store=True)
 
     def button_set_finished_to_ready(self):
         for rec in self:
@@ -31,9 +39,34 @@ class MrpWorkorder(models.Model):
     @api.depends('product_id')
     def _get_mold_in_use(self):
         for rec in self:
-            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.name)], limit=1)
+            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.product_id.name),
+                                                                  ('connection_type', '=', 'product_mold')], limit=1)
             if mold:
                 rec.get_required_mold = mold.to_resource_id
+
+    @api.depends('production_records')
+    def _compute_output_from_records(self):
+        for rec in self:
+            rec.output = sum(record.output for record in rec.production_records)
+
+    @api.depends('production_records')
+    def _compute_scrap_from_records(self):
+        for rec in self:
+            rec.scrap = sum(record.scrap for record in rec.production_records)
+
+    @api.depends('output', 'scrap')
+    def _compute_raw_output(self):
+        for rec in self:
+            rec.raw_output = rec.output + rec.scrap
+
+    @api.depends('workcenter_id')
+    def _get_associated_equipments(self):
+        for rec in self:
+            mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.product_id.name),
+                                                                  ('connection_type', '=', 'product_mold')], limit=1)
+            print(mold.to_resource_id)
+            if mold:
+                rec.associated_equipments = rec.workcenter_id.name + ',' + mold.to_resource_id
 
     @api.model
     def update_data(self):
@@ -41,6 +74,13 @@ class MrpWorkorder(models.Model):
         for workorder in get_workorder:
             super(MrpWorkorder, workorder)._onchange_expected_duration()
         return True
+
+    @api.constrains('workcenter_id')
+    def _check_workcenter_id(self):
+        for rec in self:
+            valid_workcenter_ids = rec.operation_id.alternative_workcenters.split(',')
+            if rec.workcenter_id.name not in valid_workcenter_ids:
+                raise Exception('Invalid workcenter for this operation')
 
     def change_local_time(self, time):
         user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
