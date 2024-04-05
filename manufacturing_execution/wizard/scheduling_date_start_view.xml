@@ -9,7 +9,7 @@
                         <field name="first_date_start" required="1"/>
                     </group>
                     <footer>
-                        <button name="scheduling" string="Scheduling" type="object" class="btn-primary"/>
+                        <button name="scheduling_planning" string="Scheduling And Planning" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>
