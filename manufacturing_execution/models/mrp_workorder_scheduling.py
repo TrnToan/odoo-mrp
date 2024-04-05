@@ -75,12 +75,12 @@ class MrpWorkorder(models.Model):
             super(MrpWorkorder, workorder)._onchange_expected_duration()
         return True
 
-    @api.constrains('workcenter_id')
-    def _check_workcenter_id(self):
-        for rec in self:
-            valid_workcenter_ids = rec.operation_id.alternative_workcenters.split(',')
-            if rec.workcenter_id.name not in valid_workcenter_ids:
-                raise Exception('Invalid workcenter for this operation')
+    # @api.constrains('workcenter_id')
+    # def _check_workcenter_id(self):
+    #     for rec in self:
+    #         valid_workcenter_ids = rec.operation_id.alternative_workcenters.split(',')
+    #         if rec.workcenter_id.name not in valid_workcenter_ids:
+    #             raise Exception('Invalid workcenter for this operation')
 
     def change_local_time(self, time):
         user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')

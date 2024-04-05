@@ -7,8 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//tree" position="inside">
                 <header>
-                    <button name="%(manufacturing_execution.action_scheduling_date_start)d" type="action" string="Scheduling"/>
-                    <button name="%(manufacturing_execution.action_planning_date_start)d" type="action" string="Planning"/>
+                    <button name="%(manufacturing_execution.action_scheduling_date_start)d" type="action" string="Scheduling And Planning"/>
                     <button name="button_set_done_to_cancel" type="object" string="Set Done to Cancel"/>
                 </header>
             </xpath>

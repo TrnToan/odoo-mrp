@@ -94,11 +94,16 @@ class MrpProduction(models.Model):
 
     def mo_no_priority(self, first_date_start):
         order_instance_dict = self.order_input_data(first_date_start)
+        self.dictionary_display(order_instance_dict)
+
         i = 1
         for job in range(0, len(order_instance_dict)):
             for rec in self:
-                if rec.name == order_instance_dict[job+1]['name']:
+                if rec.name == order_instance_dict[job + 1]['name']:
                     rec.no_priority_mo = len(order_instance_dict) - i + 1
+                    self.change_workcenter(name=rec.name, new_workcenter=order_instance_dict[job + 1]['workcenter'])
+                    rec.date_planned_start = self.change_format_date(order_instance_dict[job + 1]['date_start'])
+                    rec.button_plan()
                 else:
                     continue
             i += 1
@@ -109,15 +114,10 @@ class MrpProduction(models.Model):
             if rec.state == "done":
                 rec.state = "cancel"
 
-    def button_scheduling(self, first_date_start):
+    def button_scheduling_planning(self, first_date_start):
         self.button_unplan()
         self.clear_all()
         self.mo_no_priority(first_date_start)
-
-    def button_planning(self, first_date_start):
-        print("Planning execution")
-        self.button_unplan()
-        self.change_date_planned_start(first_date_start)
 
     def dictionary_display(self, instance_dict):
         print("After to dict")
