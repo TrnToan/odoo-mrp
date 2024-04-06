@@ -13,8 +13,9 @@ class MrpProductionRecord(models.Model):
     scrap = fields.Float(string='Current Scrap', required=True, help="The number of products that are not up to standard")
     raw_output = fields.Float(string='Current Raw Output', required=True, compute='_compute_raw_output')
     # A product is produced after each cycle
-    start_time = fields.Datetime(string='Start Time', required=True, help="The time when the cycle started")
-    end_time = fields.Datetime(string='End Time', required=True, help="The time when the cycle ended")
+    cycle_start_time = fields.Datetime(string='Start Time', required=True, help="The time when the cycle started")
+    cycle_end_time = fields.Datetime(string='End Time', required=True, help="The time when the cycle ended")
+    injection_time = fields.Float(string='Injection Time', required=True, help="The time for injection process")
 
     @api.depends('output', 'scrap')
     def _compute_raw_output(self):

@@ -94,8 +94,6 @@ class MrpProduction(models.Model):
 
     def mo_no_priority(self, first_date_start):
         order_instance_dict = self.order_input_data(first_date_start)
-        self.dictionary_display(order_instance_dict)
-
         i = 1
         for job in range(0, len(order_instance_dict)):
             for rec in self:

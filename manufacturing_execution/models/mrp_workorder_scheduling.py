@@ -64,7 +64,6 @@ class MrpWorkorder(models.Model):
         for rec in self:
             mold = rec.env['resource.network.connection'].search([('from_resource_id', '=', rec.product_id.name),
                                                                   ('connection_type', '=', 'product_mold')], limit=1)
-            print(mold.to_resource_id)
             if mold:
                 rec.associated_equipments = rec.workcenter_id.name + ',' + mold.to_resource_id
 
@@ -75,12 +74,13 @@ class MrpWorkorder(models.Model):
             super(MrpWorkorder, workorder)._onchange_expected_duration()
         return True
 
-    # @api.constrains('workcenter_id')
-    # def _check_workcenter_id(self):
-    #     for rec in self:
-    #         valid_workcenter_ids = rec.operation_id.alternative_workcenters.split(',')
-    #         if rec.workcenter_id.name not in valid_workcenter_ids:
-    #             raise Exception('Invalid workcenter for this operation')
+    @api.constrains('workcenter_id')
+    def _check_workcenter_id(self):
+        for rec in self:
+            valid_workcenter_ids = rec.operation_id.alternative_workcenters.split(',')
+            valid_workcenter_ids.append(rec.workcenter_id.code)
+            if rec.workcenter_id.name not in valid_workcenter_ids:
+                raise Exception('Invalid workcenter for this operation')
 
     def change_local_time(self, time):
         user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')

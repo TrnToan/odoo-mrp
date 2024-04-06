@@ -176,7 +176,11 @@ class MrpProduction(models.Model):
         # Sau khi ra chiều dài Tabu List, kết quả điều độ sơ khởi
         n_terminate = 50  # Xác định số lần lặp.
         terminate = 0
+        obj_val = 0
+        terminate_list = []
+        obj_val_list = []
         while terminate < n_terminate:
+            terminate_list.append(terminate)
             # Searching the whole neighborhood of the current solution
             tabu_structure = self.get_tabu_structure(current_solution)
             # Tạo ra cầu trúc Tabu ứng với từng cặp lân cận sẽ có một giá trị move value (giá trị hàm mục tiêu)
@@ -189,11 +193,22 @@ class MrpProduction(models.Model):
             if best_move is not None:
                 current_solution = self.swap_move(current_solution, best_move[0], best_move[1])
                 current_objvalue = self.obj_fun(current_solution, instance_dict, first_date_start)    # Tính lại hàm mục tiêu của best move lấy ở trên
+                obj_val = current_objvalue
                 # So sánh với giá trị ham mục tiêu của best move ban đầu.
                 if current_objvalue < best_objvalue:
                     best_solution = current_solution
                     best_objvalue = current_objvalue
+            obj_val_list.append(obj_val)
             terminate += 1
+        print(len(terminate_list))
+        print(len(obj_val_list))
+        write_data = {
+            'terminate_list': terminate_list,
+            'obj_val_list': obj_val_list
+        }
+        pf = pd.DataFrame(write_data)
+        export_path = r'D:\\Odoo_14\\capstone_project\\tabu_search.xlsx'
+        pf.to_excel(export_path, index=False)
         return best_solution
 
     # Khi đã ra được best solution, đưa công việc về định dạng ban đầu để thực hiện.

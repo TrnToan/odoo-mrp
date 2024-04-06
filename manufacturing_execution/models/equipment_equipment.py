@@ -23,6 +23,14 @@ class Equipment(models.Model):
 
     @api.depends('total_quantity')
     def _compute_available_quantity(self):
-        equipments_in_use = self.env['mrp.workorder'].search([('state', '=', 'progress')]).associated_equipments
+        equipments_in_use = []
+        progress_workorders = self.env['mrp.workorder'].search([('state', '=', 'progress')])
+        for workorder in progress_workorders:
+            equipments_in_use = (equipments_in_use +
+                                 (workorder.associated_equipments.split(',') if workorder.associated_equipments else []))
+
         for rec in self:
-            rec.available_quantity = rec.total_quantity - equipments_in_use.count(rec.name)
+            if equipments_in_use:
+                rec.available_quantity = rec.total_quantity - equipments_in_use.count(rec.name)
+            else:
+                rec.available_quantity = rec.total_quantity
