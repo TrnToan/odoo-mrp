@@ -3,7 +3,6 @@
 from odoo import api, fields, models
 
 import pytz
-
 import plotly.express as px
 import plotly
 import pandas as pd
@@ -23,13 +22,18 @@ class MrpWorkorder(models.Model):
     get_date_deadline = fields.Date(string='Date Deadline', store=True, related='production_id.new_date_deadline')
     get_quantity = fields.Float(string='Quantity', store=True, related='production_id.product_qty')
     output = fields.Float(string='Output', compute='_compute_output_from_records',
-                          help="The number of products produced that meets the standard")
+                          help="The number of products produced that meets the standard", store=True)
     scrap = fields.Float(string='Scrap', compute='_compute_scrap_from_records',
-                         help="The number of products that are not up to standard")
+                         help="The number of products that are not up to standard", store=True)
     raw_output = fields.Float(string='Raw Output', compute='_compute_raw_output',
                               help="The total number of products produced")
     production_records = fields.One2many('mrp.production.record', 'workorder_id', string='Production Records')
     associated_equipments = fields.Char(string='Associated Equipments', compute='_get_associated_equipments', store=True)
+    # OEE calculation
+    availability = fields.Float(string='Availability', compute='_compute_availability', store=True)
+    performance = fields.Float(string='Performance', compute='_compute_performance', store=True)
+    quality = fields.Float(string='Quality', compute='_compute_quality', store=True)
+    oee = fields.Float(string='OEE', compute='_compute_oee', store=True)
 
     def button_set_finished_to_ready(self):
         for rec in self:
@@ -58,6 +62,34 @@ class MrpWorkorder(models.Model):
     def _compute_raw_output(self):
         for rec in self:
             rec.raw_output = rec.output + rec.scrap
+
+    @api.depends('production_records', 'duration_expected')
+    def _compute_availability(self):
+        """Thoi gian chay may ra san pham / Thoi gian du kien chay may"""
+        for rec in self:
+            if rec.production_records:
+                runtime = sum((record.cycle_end_time - record.cycle_start_time).total_seconds()
+                              for record in rec.production_records)
+                rec.availability = runtime/(rec.duration_expected*60)
+
+    @api.depends('operation_id.time_cycle', 'raw_output', 'duration')
+    def _compute_performance(self):
+        """Tong san pham san xuat duoc / (Thoi gian chay may thuc te / Thoi gian chuan cua 1 san pham)"""
+        for rec in self:
+            if rec.production_records:
+                potential_total_product = rec.duration/rec.operation_id.time_cycle
+                rec.performance = rec.raw_output/potential_total_product
+
+    @api.depends('production_records')
+    def _compute_quality(self):
+        for rec in self:
+            if rec.production_records:
+                rec.quality = rec.output/(rec.output + rec.scrap)
+
+    @api.depends('availability', 'performance', 'quality')
+    def _compute_oee(self):
+        for rec in self:
+            rec.oee = rec.availability * rec.performance * rec.quality
 
     @api.depends('workcenter_id')
     def _get_associated_equipments(self):

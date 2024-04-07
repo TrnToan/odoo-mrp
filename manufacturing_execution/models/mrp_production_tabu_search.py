@@ -200,8 +200,6 @@ class MrpProduction(models.Model):
                     best_objvalue = current_objvalue
             obj_val_list.append(obj_val)
             terminate += 1
-        print(len(terminate_list))
-        print(len(obj_val_list))
         write_data = {
             'terminate_list': terminate_list,
             'obj_val_list': obj_val_list
