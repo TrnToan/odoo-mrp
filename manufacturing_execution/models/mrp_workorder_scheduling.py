@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 # noinspection PyUnresolvedReferences
 from odoo import api, fields, models
+from datetime import datetime, timedelta
 
 import pytz
 import plotly.express as px
@@ -28,7 +31,8 @@ class MrpWorkorder(models.Model):
     raw_output = fields.Float(string='Raw Output', compute='_compute_raw_output',
                               help="The total number of products produced")
     production_records = fields.One2many('mrp.production.record', 'workorder_id', string='Production Records')
-    associated_equipments = fields.Char(string='Associated Equipments', compute='_get_associated_equipments', store=True)
+    associated_equipments = fields.Char(string='Associated Equipments', compute='_get_associated_equipments',
+                                        store=True)
     # OEE calculation
     availability = fields.Float(string='Availability', compute='_compute_availability', store=True)
     performance = fields.Float(string='Performance', compute='_compute_performance', store=True)
@@ -63,28 +67,31 @@ class MrpWorkorder(models.Model):
         for rec in self:
             rec.raw_output = rec.output + rec.scrap
 
-    @api.depends('production_records', 'duration_expected')
+    @api.depends('production_records')
     def _compute_availability(self):
         """Thoi gian chay may ra san pham / Thoi gian du kien chay may"""
         for rec in self:
             if rec.production_records:
                 runtime = sum((record.cycle_end_time - record.cycle_start_time).total_seconds()
                               for record in rec.production_records)
-                rec.availability = runtime/(rec.duration_expected*60)
+                wo_time = (datetime.utcnow() + timedelta(hours=7) - rec.date_start).total_seconds()
+                rec.availability = runtime / wo_time
 
-    @api.depends('operation_id.time_cycle', 'raw_output', 'duration')
+    @api.depends('production_records')
     def _compute_performance(self):
         """Tong san pham san xuat duoc / (Thoi gian chay may thuc te / Thoi gian chuan cua 1 san pham)"""
         for rec in self:
             if rec.production_records:
-                potential_total_product = rec.duration/rec.operation_id.time_cycle
-                rec.performance = rec.raw_output/potential_total_product
+                total_injection_time = sum(record.injection_time for record in rec.production_records)
+                total_injection_cycle = sum((record.cycle_end_time - record.cycle_start_time).total_seconds()
+                                            for record in rec.production_records)
+                rec.performance = total_injection_time / total_injection_cycle
 
     @api.depends('production_records')
     def _compute_quality(self):
         for rec in self:
             if rec.production_records:
-                rec.quality = rec.output/(rec.output + rec.scrap)
+                rec.quality = rec.output / (rec.output + rec.scrap)
 
     @api.depends('availability', 'performance', 'quality')
     def _compute_oee(self):

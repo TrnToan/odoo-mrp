@@ -198,7 +198,9 @@ class MrpProduction(models.Model):
                 if current_objvalue < best_objvalue:
                     best_solution = current_solution
                     best_objvalue = current_objvalue
-            obj_val_list.append(obj_val)
+                obj_val_list.append(obj_val)
+            else:
+                obj_val_list.append(obj_val_list[len(obj_val_list)-1])
             terminate += 1
         write_data = {
             'terminate_list': terminate_list,

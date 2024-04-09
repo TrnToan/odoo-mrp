@@ -90,6 +90,20 @@
         </field>
     </record>
 
+    <record id="view_mrp_production_work_order_search_inherited" model="ir.ui.view">
+        <field name="name">mrp.production.work.order.search.inherited</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.view_mrp_production_work_order_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <group expand="1" string="Group By">
+                    <filter string="Work Order" name="name" context="{'group_by':'name'}"/>
+                    <filter string="Work Center" name="workcenter_id" context="{'group_by':'workcenter_id'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
     <record model="ir.actions.server" id="action_view_gantt">
        <field name="name">View Gantt Chart</field>
        <field name="model_id" ref="model_mrp_workorder"/>
