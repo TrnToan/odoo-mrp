@@ -43,7 +43,7 @@ class MrpProduction(models.Model):
     @api.depends('workorder_ids')
     def _cal_duration_expected(self):
         """
-        1 MO only contains 1 WO
+        1 MO contains 1 WO only
         """
         for rec in self:
             rec.production_duration_expected = rec.workorder_ids.duration_expected
@@ -93,19 +93,17 @@ class MrpProduction(models.Model):
                 rec.weight_so = get_res_partner.weight
 
     def mo_no_priority(self, first_date_start):
-        order_instance_dict = self.order_input_data(first_date_start)
-        i = 1
-        for job in range(0, len(order_instance_dict)):
-            for rec in self:
-                if rec.name == order_instance_dict[job + 1]['name']:
-                    rec.no_priority_mo = len(order_instance_dict) - i + 1
-                    self.change_workcenter(name=rec.name, new_workcenter=order_instance_dict[job + 1]['workcenter'])
-                    rec.date_planned_start = self.change_format_date(order_instance_dict[job + 1]['date_start'])
-                    rec.button_plan()
-                else:
-                    continue
-            i += 1
-
+        order_instance_dicts = self.order_input_data(first_date_start)
+        for order_instance_dict in order_instance_dicts:
+            i = 1
+            for job in range(0, len(order_instance_dict)):
+                for rec in self:
+                    if rec.name == order_instance_dict[job + 1]['name']:
+                        rec.no_priority_mo = len(order_instance_dict) - i + 1
+                        self.change_workcenter(name=rec.name, new_workcenter=order_instance_dict[job + 1]['workcenter'])
+                        rec.date_planned_start = self.change_format_date(order_instance_dict[job + 1]['date_start'])
+                        rec.button_plan()
+                i += 1
 
     def button_set_done_to_cancel(self):
         for rec in self:

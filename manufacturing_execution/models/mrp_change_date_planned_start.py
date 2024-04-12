@@ -49,35 +49,37 @@ class MrpProduction(models.Model):
         """
         Tính toán ngày bắt đầu cho MO thứ job (job: stt)
         """
-        find = []
-        # tìm kiếm tất cả các MO đã được lên lịch trên máy ép của MO thứ job rồi add vào list find bên trên
-        for i in range(1, job + 1):
-            if instance_dict[i]['workcenter'] == instance_dict[job]['workcenter']:
-                find.append(instance_dict[i])
+        # instance_dict chua thong tin cua cac MO duoc thuc hien boi cung mot workcenter
 
-        # nếu MO thứ job là MO đầu tiên trên máy này thì
-        if len(find) == 1:
-            first_date_planned_start = self.first_date_planned_start(first_date_start)
-            if find[-1]['release_date'] != 0:
-                if find[-1]['release_date'] > first_date_planned_start:
-                    date_start = find[-1]['release_date']
-                else:
-                    date_start = first_date_planned_start
-            else:
-                date_start = first_date_planned_start
-        else:
-            next_date_start = find[-2]['date_finish']
-            if find[-1]['mold'] != find[-2]['mold']:
-                # cộng thêm thời gian thay khuôn trong trường hợp khuôn của 2 đơn ko giống nhau
-                next_date_start = find[-2]['date_finish'] + datetime.timedelta(hours=3)
-            if find[-1]['release_date'] != 0:
-                if find[-1]['release_date'] > next_date_start:
-                    date_start = find[-1]['release_date']
-                else:
-                    date_start = next_date_start
-            else:
-                date_start = next_date_start
-        return date_start
+        # find = []
+        # # tìm kiếm tất cả các MO đã được lên lịch trên máy ép của MO thứ job rồi add vào list find bên trên
+        # for i in range(1, job + 1):
+        #     if instance_dict[i]['workcenter'] == instance_dict[job]['workcenter']:
+        #         find.append(instance_dict[i])
+        #
+        # # nếu MO thứ job là MO đầu tiên trên máy này thì
+        # if len(find) == 1:
+        #     first_date_planned_start = self.first_date_planned_start(first_date_start)
+        #     if find[-1]['release_date'] != 0:
+        #         if find[-1]['release_date'] > first_date_planned_start:
+        #             date_start = find[-1]['release_date']
+        #         else:
+        #             date_start = first_date_planned_start
+        #     else:
+        #         date_start = first_date_planned_start
+        # else:
+        #     next_date_start = find[-2]['date_finish']
+        #     if find[-1]['mold'] != find[-2]['mold']:
+        #         # cộng thêm thời gian thay khuôn trong trường hợp khuôn của 2 đơn ko giống nhau
+        #         next_date_start = find[-2]['date_finish'] + datetime.timedelta(hours=3)
+        #     if find[-1]['release_date'] != 0:
+        #         if find[-1]['release_date'] > next_date_start:
+        #             date_start = find[-1]['release_date']
+        #         else:
+        #             date_start = next_date_start
+        #     else:
+        #         date_start = next_date_start
+        # return date_start
 
     def change_workcenter(self, name, new_workcenter):
         """

@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from odoo import fields, models
+import os
 import datetime
 import pandas as pd
-import random as rd
+import openpyxl
 
 
 class MrpProduction(models.Model):
     _inherit = "mrp.production"
 
-    def get_data_dictionary(self):
+    def get_data_groupby_workcenter(self):
         """
-        Lấy dữ liệu của tất cả các MO cần lên lịch
+        Lấy dữ liệu của tất cả các MO cần lên lịch --> gom lại theo từng workcenter
         """
         mo_no = []
         mo_name = []
@@ -55,18 +56,17 @@ class MrpProduction(models.Model):
                     'date_finish': mo_date_planned_finish,
                     'deadline_manufacturing': mo_deadline_manufacturing,
                     'duration_expected': mo_duration_expected}
-
-        instance_dict = pd.DataFrame(all_info)
-        instance_dict = instance_dict.sort_values(by='no', ascending=False)
-        index = pd.Series([i for i in range(1, len(mo_name) + 1)])
-        instance_dict = instance_dict.set_index([index], 'name')
-        instance_dict = instance_dict.to_dict('index')
-        self.dictionary_display(instance_dict)
-        return instance_dict
+        df = pd.DataFrame(all_info)
+        df_groupby_workcenter = df.groupby('workcenter')
+        return df_groupby_workcenter
 
     def get_tenure(self, instance_dict):
         """Return the length of Tabu List"""
-        if len(instance_dict) < 10:
+        if len(instance_dict) < 2:
+            return 0
+        elif len(instance_dict) < 5:
+            tenure = 2
+        elif len(instance_dict) < 10:
             tenure = 5
         elif len(instance_dict) < 20:
             tenure = 15
@@ -78,7 +78,7 @@ class MrpProduction(models.Model):
     # {(1,2):{'move_value':0}, (2,3):{'move_value:0}}
     def get_tabu_structure(self, solution):
         """Takes a dict (input data)
-            Returns a dict of tabu attributes(pair of jobs that are swapped) as keys and [move_value]"""
+            Returns a dict of tabu attributes (pair of jobs that are swapped) as keys and [move_value]"""
         dict_data = {}
         swap = []
         for i in range(0, len(solution)-1):
@@ -97,13 +97,25 @@ class MrpProduction(models.Model):
         """Takes a set of scheduled jobs, dict (input data)
             Return the objective function value of the solution"""
         objfun_value = 0
+        arranged_jobs = []
         for job in solution:
-            date_planned_start = self.find_date_planned_start(instance_dict=instance_dict,
-                                                              job=job,
-                                                              first_date_start=first_date_start)
-
+            first_date_planned_start = self.first_date_planned_start(first_date_start)
+            if len(arranged_jobs) == 0:
+                if instance_dict[job]['release_date'] > first_date_planned_start:
+                    date_planned_start = instance_dict[job]['release_date']
+                else:
+                    date_planned_start = first_date_planned_start
+            else:
+                next_date_planned_start = arranged_jobs[-1]['date_finish']
+                if instance_dict[job]['mold'] != arranged_jobs[-1]['mold']:
+                    next_date_planned_start = arranged_jobs[-1]['date_finish'] + datetime.timedelta(hours=3)
+                if instance_dict[job]['release_date'] > next_date_planned_start:
+                    date_planned_start = instance_dict[job]['release_date']
+                else:
+                    date_planned_start = next_date_planned_start
             instance_dict[job]['date_start'] = date_planned_start
             instance_dict[job]['date_finish'] = date_planned_start + datetime.timedelta(minutes=instance_dict[job]["duration_expected"])
+            arranged_jobs.append(instance_dict[job])
 
             ts = self.get_time_range(date_planned_start, first_date_start)
             te_i = ts + instance_dict[job]["duration_expected"]
@@ -114,7 +126,6 @@ class MrpProduction(models.Model):
             else:
                 u_i = 0.0
             W_i = instance_dict[job]["weight"]
-
             objfun_value += W_i * u_i     # Giá trị hàm mục tiêu
         return objfun_value
 
@@ -166,6 +177,9 @@ class MrpProduction(models.Model):
         """The implementation Tabu Search algorithm with short-term memory and pair swap as Tabu attribute"""
         # Parameters:
         tenure = self.get_tenure(instance_dict)    # Chiều dài Tabu List.
+        if tenure == 0:
+            instance_dict[1]['date_start'] = self.first_date_planned_start(first_date_start)
+            return self.get_initial_solution(instance_dict)
 
         tabu_list = [[0, 0] for x in range(0, tenure)]   # Khai báo Tabu List.
         current_solution = self.get_initial_solution(instance_dict)  # Tạo current solution là lời giải ban đầu.
@@ -203,55 +217,87 @@ class MrpProduction(models.Model):
                 obj_val_list.append(obj_val_list[len(obj_val_list)-1])
             terminate += 1
         write_data = {
+            'workcenter': instance_dict[1]['workcenter'],
             'terminate_list': terminate_list,
             'obj_val_list': obj_val_list
         }
         pf = pd.DataFrame(write_data)
         export_path = r'D:\\Odoo_14\\capstone_project\\tabu_search.xlsx'
-        pf.to_excel(export_path, index=False)
+        if os.path.exists(export_path):
+            df_existing = pd.read_excel(export_path)
+            df_final = pd.concat([df_existing, pf])
+        else:
+            df_final = pf
+
+        # Write back to Excel
+        df_final.to_excel(export_path, index=False)
         return best_solution
 
     # Khi đã ra được best solution, đưa công việc về định dạng ban đầu để thực hiện.
     # Ví dụ: best move = 2 1 3 4 5 -> 1 2 3 4 5
     def order_input_data(self, first_date_start):
-        instance_dict = self.get_data_dictionary()  # Lấy dữ liệu đầu vào
-        best = self.tabu_search(instance_dict, first_date_start)  # Tìm ra được kết quả của Tabu Search -> Thứ tự
-        order_no = []
-        order_name = []
-        order_weight = []
-        order_bom = []
-        order_workcenter = []
-        order_mold = []
-        order_release_date = []
-        order_date_planned_start = []
-        order_date_planned_finish = []
-        order_deadline_manufacturing = []
-        order_duration_expected = []
-        for job in best:  # Chuẩn hoá lại dữ liệu ban đầu theo dữ liệu đã điều độ với số thứ tự từ nhỏ đến lớn.
-            order_no.append(instance_dict[job]['no'])
-            order_name.append(instance_dict[job]['name'])
-            order_weight.append(instance_dict[job]['weight'])
-            order_bom.append(instance_dict[job]['bom'])
-            order_workcenter.append(instance_dict[job]['workcenter'])
-            order_mold.append(instance_dict[job]['mold'])
-            order_release_date.append(instance_dict[job]['release_date'])
-            order_date_planned_start.append(instance_dict[job]['date_start'])
-            order_date_planned_finish.append(instance_dict[job]['date_finish'])
-            order_deadline_manufacturing.append(instance_dict[job]['deadline_manufacturing'])
-            order_duration_expected.append(instance_dict[job]['duration_expected'])
-        order_all_info = {
-            'no': order_no,
-            'name': order_name,
-            'weight': order_weight,
-            'bom': order_bom,
-            'workcenter': order_workcenter,
-            'mold': order_mold,
-            'release_date': order_release_date,
-            'date_start': order_date_planned_start,
-            'date_finish': order_date_planned_finish,
-            'deadline_manufacturing': order_deadline_manufacturing,
-            'duration_expected': order_duration_expected,
-        }
-        order_instance_dict = pd.DataFrame(order_all_info, index=[i for i in range(1, len(order_name) + 1)]).to_dict(
-            'index')
-        return order_instance_dict
+        df_groupby_workcenter = self.get_data_groupby_workcenter()  # Lấy dữ liệu đầu vào
+        dicts_by_workcenter = []
+        solutions_by_workcenter = []
+        for name, group in df_groupby_workcenter:
+            index = pd.Series([i for i in range(1, len(group['name']) + 1)])
+            instance_dict = group.set_index([index]).to_dict('index')
+            best_solution = self.tabu_search(instance_dict, first_date_start)
+            print(f"Best solution for workcenter {name}: {best_solution}")
+            solutions_by_workcenter.append(best_solution)
+            dicts_by_workcenter.append(instance_dict)
+
+        order_instance_dicts = []
+        idx_of_workcenter = 0
+        for solution in solutions_by_workcenter:
+            # print(solution)
+            # print("workcenter no.", idx_of_workcenter)
+            order_no = []
+            order_name = []
+            order_weight = []
+            order_bom = []
+            order_workcenter = []
+            order_mold = []
+            order_release_date = []
+            order_date_planned_start = []
+            order_date_planned_finish = []
+            order_deadline_manufacturing = []
+            order_duration_expected = []
+            for job in solution:  # Chuẩn hoá lại dữ liệu ban đầu theo dữ liệu đã điều độ với số thứ tự từ nhỏ đến lớn.
+                order_no.append(dicts_by_workcenter[idx_of_workcenter][job]['no'])
+                order_name.append(dicts_by_workcenter[idx_of_workcenter][job]['name'])
+                order_weight.append(dicts_by_workcenter[idx_of_workcenter][job]['weight'])
+                order_bom.append(dicts_by_workcenter[idx_of_workcenter][job]['bom'])
+                order_workcenter.append(dicts_by_workcenter[idx_of_workcenter][job]['workcenter'])
+                order_mold.append(dicts_by_workcenter[idx_of_workcenter][job]['mold'])
+                order_release_date.append(dicts_by_workcenter[idx_of_workcenter][job]['release_date'])
+                order_date_planned_start.append(dicts_by_workcenter[idx_of_workcenter][job]['date_start'])
+                order_date_planned_finish.append(dicts_by_workcenter[idx_of_workcenter][job]['date_finish'])
+                order_deadline_manufacturing.append(dicts_by_workcenter[idx_of_workcenter][job]['deadline_manufacturing'])
+                order_duration_expected.append(dicts_by_workcenter[idx_of_workcenter][job]['duration_expected'])
+            order_all_info = {
+                'no': order_no,
+                'name': order_name,
+                'weight': order_weight,
+                'bom': order_bom,
+                'workcenter': order_workcenter,
+                'mold': order_mold,
+                'release_date': order_release_date,
+                'date_start': order_date_planned_start,
+                'date_finish': order_date_planned_finish,
+                'deadline_manufacturing': order_deadline_manufacturing,
+                'duration_expected': order_duration_expected,
+            }
+            order_instance_dict = (pd.DataFrame(order_all_info, index=[i for i in range(1, len(order_name) + 1)])
+                                   .to_dict('index'))
+            order_instance_dicts.append(order_instance_dict)
+            idx_of_workcenter += 1
+            self.dictionary_display(order_instance_dict)
+        return order_instance_dicts
+
+    @staticmethod
+    def print_groups(df_groupby):
+        for name, group in df_groupby:
+            print(f"Group name: {name}")
+            print(group)
+            print("\n")
