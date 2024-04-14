@@ -21,6 +21,12 @@ class Equipment(models.Model):
     equipment_type_id = fields.Many2one('equipment.type', string="Equipment Type")
     equipment_property_ids = fields.One2many('equipment.property', 'equipment_id', string="Equipment Property")
 
+    _sql_constraints = [
+        ('code_equipment_type_id_index',
+         'UNIQUE(code, equipment_type_id)',
+         'The combination of code and equipment type must be unique!')
+    ]
+
     @api.depends('total_quantity')
     def _compute_available_quantity(self):
         equipments_in_use = []

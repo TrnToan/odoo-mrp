@@ -18,6 +18,9 @@
                     </group>
                 </page>
             </xpath>
+            <xpath expr="//field[@name='categ_id']" position="before">
+                <field name="mold"/>
+            </xpath>
         </field>
     </record>
 

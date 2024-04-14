@@ -142,7 +142,7 @@ class MrpWorkorder(models.Model):
         for rec in msg_lateness_so:
             new_title += f"{rec[0]}-{rec[1]} | "
             if msg_lateness_so.index(rec) == 9:
-                new_title += f"<br>                            "
+                new_title += f"<br>"
 
         new_title += f"<br>Đơn sản xuất trễ: "
         for rec in lateness_mo:

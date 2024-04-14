@@ -9,6 +9,7 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
 
     get_required_mold = fields.Char(string="Related Mold", compute='_get_mold_from_resource_network_connection')
+    mold = fields.Char(string="Mold", help="The mold used to produce this product", required=True)
     product_template_property_ids = fields.One2many('product.template.property', 'product_template_id',
                                                     string="Product Template Properties")
 
@@ -19,3 +20,24 @@ class ProductTemplate(models.Model):
                                                                   ('connection_type', '=', 'product_mold')], limit=1)
             if mold:
                 rec.get_required_mold = mold.to_resource_id
+
+    @api.model
+    def create(self, vals):
+        res = super(ProductTemplate, self).create(vals)
+
+        self.env['resource.network.connection'].create({
+            'from_resource_id': vals.get('name'),
+            'to_resource_id': vals['mold'],
+            'name': f"{vals.get('name')} is molded from {vals['mold']}",
+            'connection_type': 'product_mold'
+        })
+        return res
+
+    def write(self, vals):
+        res = super(ProductTemplate, self).write(vals)
+        if 'mold' in vals:
+            self.env['resource.network.connection'].search([('from_resource_id', '=', self.name),
+                                                            ('connection_type', '=', 'product_mold')]).write({
+                'to_resource_id': vals['mold']
+            })
+        return res

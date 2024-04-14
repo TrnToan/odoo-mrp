@@ -81,16 +81,16 @@ class MrpProduction(models.Model):
             Returns a dict of tabu attributes (pair of jobs that are swapped) as keys and [move_value]"""
         dict_data = {}
         swap = []
-        for i in range(0, len(solution)-1):
+        for i in range(0, len(solution) - 1):
             swap.append(solution[i])
-            swap.append(solution[i+1])
+            swap.append(solution[i + 1])
             dict_data[tuple(swap)] = {'move_value': 0}
             swap = []
         return dict_data
 
     def get_initial_solution(self, instance_dict):
         n_jobs = len(instance_dict)
-        initial_solution = list(range(1, n_jobs+1))
+        initial_solution = list(range(1, n_jobs + 1))
         return initial_solution
 
     def obj_fun(self, solution, instance_dict, first_date_start):
@@ -114,19 +114,21 @@ class MrpProduction(models.Model):
                 else:
                     date_planned_start = next_date_planned_start
             instance_dict[job]['date_start'] = date_planned_start
-            instance_dict[job]['date_finish'] = date_planned_start + datetime.timedelta(minutes=instance_dict[job]["duration_expected"])
+            instance_dict[job]['date_finish'] = date_planned_start + datetime.timedelta(
+                minutes=instance_dict[job]["duration_expected"])
             arranged_jobs.append(instance_dict[job])
 
             ts = self.get_time_range(date_planned_start, first_date_start)
             te_i = ts + instance_dict[job]["duration_expected"]
-            d_i = self.get_time_range(instance_dict[job]["deadline_manufacturing"], first_date_start)  # Thời gian quá hạn
-            L_i = te_i - d_i          # Độ trễ đại số bằng thời gian kết thúc - thời gian quá hạn
+            d_i = self.get_time_range(instance_dict[job]["deadline_manufacturing"],
+                                      first_date_start)  # Thời gian quá hạn
+            L_i = te_i - d_i  # Độ trễ đại số bằng thời gian kết thúc - thời gian quá hạn
             if L_i > 0:
                 u_i = 1.0
             else:
                 u_i = 0.0
             W_i = instance_dict[job]["weight"]
-            objfun_value += W_i * u_i     # Giá trị hàm mục tiêu
+            objfun_value += W_i * u_i * L_i  # Giá trị hàm mục tiêu
         return objfun_value
 
     def swap_move(self, solution, i, j):
@@ -151,17 +153,19 @@ class MrpProduction(models.Model):
             return False
 
     def get_best_move(self, tabu_structure, tabu_list):
-        present_best_move = min(tabu_structure, key=lambda x: tabu_structure[x]['move_value']) # Kiểm tra move value nào là nhỏ nhất
+        present_best_move = min(tabu_structure,
+                                key=lambda x: tabu_structure[x]['move_value'])  # Kiểm tra move value nào là nhỏ nhất
         move_value = tabu_structure[present_best_move]['move_value']  # Lấy giá trị move value nhỏ nhất
         list_key = []
         for key in tabu_structure.keys():
             if tabu_structure[key]['move_value'] == move_value:
-                list_key.append(list(key))    # Có thể có nhiều điểm có giá trị tốt nhất.
+                list_key.append(list(key))  # Có thể có nhiều điểm có giá trị tốt nhất.
 
         just_updated = False
         for index in range(0, len(list_key)):
             best_move = list_key[index]
-            check_tabu_list = self.check_tabu_list(tabu_list, best_move) # Kiểm tra Tabu list có cặp đó chưa, có rồi thì bỏ qua.
+            check_tabu_list = self.check_tabu_list(tabu_list,
+                                                   best_move)  # Kiểm tra Tabu list có cặp đó chưa, có rồi thì bỏ qua.
             if not check_tabu_list:
                 tabu_list = self.update_tabu_list(tabu_list, best_move)
                 just_updated = True
@@ -171,26 +175,25 @@ class MrpProduction(models.Model):
             best_move = None
             tabu_list = tabu_list
             return best_move, tabu_list
-        return tuple(best_move), tabu_list    # Xuất ra được Best Move và Tabu List mới nhất.
+        return tuple(best_move), tabu_list  # Xuất ra được Best Move và Tabu List mới nhất.
 
     def tabu_search(self, instance_dict, first_date_start):
         """The implementation Tabu Search algorithm with short-term memory and pair swap as Tabu attribute"""
         # Parameters:
-        tenure = self.get_tenure(instance_dict)    # Chiều dài Tabu List.
+        tenure = self.get_tenure(instance_dict)  # Chiều dài Tabu List.
         if tenure == 0:
             instance_dict[1]['date_start'] = self.first_date_planned_start(first_date_start)
             return self.get_initial_solution(instance_dict)
 
-        tabu_list = [[0, 0] for x in range(0, tenure)]   # Khai báo Tabu List.
+        tabu_list = [[0, 0] for x in range(0, tenure)]  # Khai báo Tabu List.
         current_solution = self.get_initial_solution(instance_dict)  # Tạo current solution là lời giải ban đầu.
 
-        best_objvalue = self.obj_fun(current_solution, instance_dict, first_date_start)   # Tính giá trị hàm mục tiêu
-        best_solution = current_solution    # Kết quả điều độ tốt nhất với vòng lặp chạy đầu tiên.
+        best_objvalue = self.obj_fun(current_solution, instance_dict, first_date_start)  # Tính giá trị hàm mục tiêu
+        best_solution = current_solution  # Kết quả điều độ tốt nhất với vòng lặp chạy đầu tiên.
 
         # Sau khi ra chiều dài Tabu List, kết quả điều độ sơ khởi
-        n_terminate = 50  # Xác định số lần lặp.
+        n_terminate = 100  # Xác định số lần lặp.
         terminate = 0
-        obj_val = 0
         terminate_list = []
         obj_val_list = []
         while terminate < n_terminate:
@@ -206,7 +209,8 @@ class MrpProduction(models.Model):
             best_move, tabu_list = self.get_best_move(tabu_structure, tabu_list)
             if best_move is not None:
                 current_solution = self.swap_move(current_solution, best_move[0], best_move[1])
-                current_objvalue = self.obj_fun(current_solution, instance_dict, first_date_start)    # Tính lại hàm mục tiêu của best move lấy ở trên
+                current_objvalue = self.obj_fun(current_solution, instance_dict,
+                                                first_date_start)  # Tính lại hàm mục tiêu của best move lấy ở trên
                 obj_val = current_objvalue
                 # So sánh với giá trị ham mục tiêu của best move ban đầu.
                 if current_objvalue < best_objvalue:
@@ -214,7 +218,7 @@ class MrpProduction(models.Model):
                     best_objvalue = current_objvalue
                 obj_val_list.append(obj_val)
             else:
-                obj_val_list.append(obj_val_list[len(obj_val_list)-1])
+                obj_val_list.append(obj_val_list[len(obj_val_list) - 1])
             terminate += 1
         write_data = {
             'workcenter': instance_dict[1]['workcenter'],
@@ -273,7 +277,8 @@ class MrpProduction(models.Model):
                 order_release_date.append(dicts_by_workcenter[idx_of_workcenter][job]['release_date'])
                 order_date_planned_start.append(dicts_by_workcenter[idx_of_workcenter][job]['date_start'])
                 order_date_planned_finish.append(dicts_by_workcenter[idx_of_workcenter][job]['date_finish'])
-                order_deadline_manufacturing.append(dicts_by_workcenter[idx_of_workcenter][job]['deadline_manufacturing'])
+                order_deadline_manufacturing.append(
+                    dicts_by_workcenter[idx_of_workcenter][job]['deadline_manufacturing'])
                 order_duration_expected.append(dicts_by_workcenter[idx_of_workcenter][job]['duration_expected'])
             order_all_info = {
                 'no': order_no,
@@ -288,11 +293,14 @@ class MrpProduction(models.Model):
                 'deadline_manufacturing': order_deadline_manufacturing,
                 'duration_expected': order_duration_expected,
             }
-            order_instance_dict = (pd.DataFrame(order_all_info, index=[i for i in range(1, len(order_name) + 1)])
-                                   .to_dict('index'))
+            df = (pd.DataFrame(order_all_info, index=[i for i in range(1, len(order_name) + 1)])
+                  .sort_values(by='date_start')
+                  .reset_index(drop=True))
+            df.index = range(1, len(df) + 1)
+            order_instance_dict = df.to_dict('index')
             order_instance_dicts.append(order_instance_dict)
             idx_of_workcenter += 1
-            self.dictionary_display(order_instance_dict)
+            # self.dictionary_display(order_instance_dict)
         return order_instance_dicts
 
     @staticmethod
