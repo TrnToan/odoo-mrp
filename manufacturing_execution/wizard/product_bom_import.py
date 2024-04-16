@@ -42,7 +42,8 @@ class ProductBomImport(models.TransientModel):
 
         product_bom_ids = []
         for line in import_lines:
-            product_tmpl_id = self.env['product.template'].search([('default_code', '=', line['Reference'])], limit=1).id
+            product_tmpl = self.env['product.template'].search([('default_code', '=', line['Reference'])], limit=1)
+            product_tmpl_id = product_tmpl.id
             product_code = self.get_code_from_component(line['BoM Lines/Component'])
             product_id = self.env['product.product'].search([('default_code', '=', product_code)], limit=1).id
             product_uom_id = self.env['uom.uom'].search([('name', '=', line['Unit of Measure'])], limit=1).id
@@ -65,11 +66,11 @@ class ProductBomImport(models.TransientModel):
                 })]
             }))
 
-            product_name = self.get_name_from_component(line['BoM Lines/Component'])
+            product_name = product_tmpl.name
             self.env['resource.network.connection'].create({
                 'from_resource_id': product_name,
                 'to_resource_id': line['Operations/Work Center'],
-                'name': product_name + ' is produced at workcenter ' + line['Operations/Work Center'],
+                'connection_name': product_name + ' is produced at workcenter ' + line['Operations/Work Center'],
                 'connection_type': "product_workcenter"
             })
 

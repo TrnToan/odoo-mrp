@@ -6,6 +6,8 @@ import datetime
 import pandas as pd
 import openpyxl
 
+import random
+
 
 class MrpProduction(models.Model):
     _inherit = "mrp.production"
@@ -71,7 +73,7 @@ class MrpProduction(models.Model):
         elif len(instance_dict) < 20:
             tenure = 15
         else:
-            tenure = 31
+            tenure = 30
         return tenure
 
     # Từ solution đưa ra tập giá trị bao gồm:
@@ -80,17 +82,17 @@ class MrpProduction(models.Model):
         """Takes a dict (input data)
             Returns a dict of tabu attributes (pair of jobs that are swapped) as keys and [move_value]"""
         dict_data = {}
-        swap = []
         for i in range(0, len(solution) - 1):
-            swap.append(solution[i])
-            swap.append(solution[i + 1])
-            dict_data[tuple(swap)] = {'move_value': 0}
-            swap = []
+            move = [solution[i], solution[i + 1]]
+            dict_data[tuple(move)] = {'move_value': 0}
         return dict_data
 
     def get_initial_solution(self, instance_dict):
         n_jobs = len(instance_dict)
         initial_solution = list(range(1, n_jobs + 1))
+        if n_jobs > 2:
+            shuffled_solution = random.sample(initial_solution, n_jobs)
+            initial_solution = shuffled_solution
         return initial_solution
 
     def obj_fun(self, solution, instance_dict, first_date_start):
@@ -120,8 +122,7 @@ class MrpProduction(models.Model):
 
             ts = self.get_time_range(date_planned_start, first_date_start)
             te_i = ts + instance_dict[job]["duration_expected"]
-            d_i = self.get_time_range(instance_dict[job]["deadline_manufacturing"],
-                                      first_date_start)  # Thời gian quá hạn
+            d_i = self.get_time_range(instance_dict[job]["deadline_manufacturing"], first_date_start)  # Thời gian quá hạn
             L_i = te_i - d_i  # Độ trễ đại số bằng thời gian kết thúc - thời gian quá hạn
             if L_i > 0:
                 u_i = 1.0
@@ -149,12 +150,10 @@ class MrpProduction(models.Model):
     def check_tabu_list(self, tabu_list, best_move):
         if best_move in tabu_list:
             return True
-        else:
-            return False
+        return False
 
     def get_best_move(self, tabu_structure, tabu_list):
-        present_best_move = min(tabu_structure,
-                                key=lambda x: tabu_structure[x]['move_value'])  # Kiểm tra move value nào là nhỏ nhất
+        present_best_move = min(tabu_structure, key=lambda x: tabu_structure[x]['move_value'])  # Kiểm tra move value nào là nhỏ nhất
         move_value = tabu_structure[present_best_move]['move_value']  # Lấy giá trị move value nhỏ nhất
         list_key = []
         for key in tabu_structure.keys():
@@ -164,8 +163,8 @@ class MrpProduction(models.Model):
         just_updated = False
         for index in range(0, len(list_key)):
             best_move = list_key[index]
-            check_tabu_list = self.check_tabu_list(tabu_list,
-                                                   best_move)  # Kiểm tra Tabu list có cặp đó chưa, có rồi thì bỏ qua.
+            check_tabu_list = self.check_tabu_list(tabu_list, best_move)
+            # Kiểm tra Tabu list có cặp đó chưa, có rồi thì bỏ qua.
             if not check_tabu_list:
                 tabu_list = self.update_tabu_list(tabu_list, best_move)
                 just_updated = True
@@ -173,13 +172,11 @@ class MrpProduction(models.Model):
 
         if not just_updated:
             best_move = None
-            tabu_list = tabu_list
             return best_move, tabu_list
         return tuple(best_move), tabu_list  # Xuất ra được Best Move và Tabu List mới nhất.
 
     def tabu_search(self, instance_dict, first_date_start):
         """The implementation Tabu Search algorithm with short-term memory and pair swap as Tabu attribute"""
-        # Parameters:
         tenure = self.get_tenure(instance_dict)  # Chiều dài Tabu List.
         if tenure == 0:
             instance_dict[1]['date_start'] = self.first_date_planned_start(first_date_start)
@@ -187,15 +184,17 @@ class MrpProduction(models.Model):
 
         tabu_list = [[0, 0] for x in range(0, tenure)]  # Khai báo Tabu List.
         current_solution = self.get_initial_solution(instance_dict)  # Tạo current solution là lời giải ban đầu.
+        print(f"Initial solution: {current_solution}")
 
         best_objvalue = self.obj_fun(current_solution, instance_dict, first_date_start)  # Tính giá trị hàm mục tiêu
         best_solution = current_solution  # Kết quả điều độ tốt nhất với vòng lặp chạy đầu tiên.
 
         # Sau khi ra chiều dài Tabu List, kết quả điều độ sơ khởi
-        n_terminate = 100  # Xác định số lần lặp.
+        n_terminate = 150  # Xác định số lần lặp.
         terminate = 0
         terminate_list = []
         obj_val_list = []
+        solution_list = []
         while terminate < n_terminate:
             terminate_list.append(terminate)
             # Searching the whole neighborhood of the current solution
@@ -211,19 +210,22 @@ class MrpProduction(models.Model):
                 current_solution = self.swap_move(current_solution, best_move[0], best_move[1])
                 current_objvalue = self.obj_fun(current_solution, instance_dict,
                                                 first_date_start)  # Tính lại hàm mục tiêu của best move lấy ở trên
-                obj_val = current_objvalue
                 # So sánh với giá trị ham mục tiêu của best move ban đầu.
                 if current_objvalue < best_objvalue:
                     best_solution = current_solution
                     best_objvalue = current_objvalue
-                obj_val_list.append(obj_val)
+
+                solution_list.append(current_solution)
+                obj_val_list.append(current_objvalue)
             else:
+                solution_list.append(current_solution)
                 obj_val_list.append(obj_val_list[len(obj_val_list) - 1])
             terminate += 1
         write_data = {
             'workcenter': instance_dict[1]['workcenter'],
             'terminate_list': terminate_list,
-            'obj_val_list': obj_val_list
+            'obj_val_list': obj_val_list,
+            # 'current_solution': solution_list
         }
         pf = pd.DataFrame(write_data)
         export_path = r'D:\\Odoo_14\\capstone_project\\tabu_search.xlsx'

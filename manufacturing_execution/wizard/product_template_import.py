@@ -59,12 +59,13 @@ class ProductTemplateImport(models.TransientModel):
                 'purchase_ok': line['Can be Purchased'],
                 'sale_ok': line['Can be Sold'],
                 'route_ids': [(6, 0, route_ids)],
+                'mold': line['Mold'],
                 'description': line['Description'],
             }))
             self.env['resource.network.connection'].create({
                 'from_resource_id': line['Name'],
                 'to_resource_id': line['Mold'],
-                'name': line['Name'] + ' is molded from ' + line['Mold'],
+                'connection_name': line['Name'] + ' is molded from ' + line['Mold'],
                 'connection_type': "product_mold"
             })
 
