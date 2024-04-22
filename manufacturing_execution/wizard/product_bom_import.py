@@ -60,7 +60,6 @@ class ProductBomImport(models.TransientModel):
                 'operation_ids': [(0, 0, {
                     'name': line['Operations/Operation'],
                     'workcenter_id': workcenter_id,
-                    'alternative_workcenters': line['Operations/Alternative Workcenters'],
                     'time_mode': line['Operations/Duration Computation'],
                     'time_cycle_manual': line['Operations/Manual Duration'],
                 })]

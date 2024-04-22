@@ -74,7 +74,10 @@ class MrpWorkorder(models.Model):
             if rec.production_records:
                 runtime = sum((record.cycle_end_time - record.cycle_start_time).total_seconds()
                               for record in rec.production_records)
-                wo_time = (datetime.utcnow() + timedelta(hours=7) - rec.date_start).total_seconds()
+                if self.state == 'done':
+                    wo_time = (rec.date_finished - rec.date_start).total_seconds()
+                else:
+                    wo_time = (datetime.utcnow() - rec.date_start).total_seconds()
                 rec.availability = runtime / wo_time
 
     @api.depends('production_records')

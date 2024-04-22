@@ -67,13 +67,13 @@ class MrpProduction(models.Model):
         if len(instance_dict) < 2:
             return 0
         elif len(instance_dict) < 5:
-            tenure = 2
+            tenure = 1
         elif len(instance_dict) < 10:
-            tenure = 5
+            tenure = 2
         elif len(instance_dict) < 20:
-            tenure = 15
+            tenure = 5
         else:
-            tenure = 30
+            tenure = 8
         return tenure
 
     # Từ solution đưa ra tập giá trị bao gồm:
@@ -116,8 +116,7 @@ class MrpProduction(models.Model):
                 else:
                     date_planned_start = next_date_planned_start
             instance_dict[job]['date_start'] = date_planned_start
-            instance_dict[job]['date_finish'] = date_planned_start + datetime.timedelta(
-                minutes=instance_dict[job]["duration_expected"])
+            instance_dict[job]['date_finish'] = date_planned_start + datetime.timedelta(minutes=instance_dict[job]["duration_expected"])
             arranged_jobs.append(instance_dict[job])
 
             ts = self.get_time_range(date_planned_start, first_date_start)
@@ -190,14 +189,14 @@ class MrpProduction(models.Model):
         best_solution = current_solution  # Kết quả điều độ tốt nhất với vòng lặp chạy đầu tiên.
 
         # Sau khi ra chiều dài Tabu List, kết quả điều độ sơ khởi
-        n_terminate = 150  # Xác định số lần lặp.
+        n_terminate = 100  # Xác định số lần lặp.
         terminate = 0
         terminate_list = []
         obj_val_list = []
         solution_list = []
         while terminate < n_terminate:
             terminate_list.append(terminate)
-            # Searching the whole neighborhood of the current solution
+            # Searching the whole neighbor solutions of the current solution
             tabu_structure = self.get_tabu_structure(current_solution)
             # Tạo ra cầu trúc Tabu ứng với từng cặp lân cận sẽ có một giá trị move value (giá trị hàm mục tiêu)
             for move in tabu_structure:
@@ -279,8 +278,7 @@ class MrpProduction(models.Model):
                 order_release_date.append(dicts_by_workcenter[idx_of_workcenter][job]['release_date'])
                 order_date_planned_start.append(dicts_by_workcenter[idx_of_workcenter][job]['date_start'])
                 order_date_planned_finish.append(dicts_by_workcenter[idx_of_workcenter][job]['date_finish'])
-                order_deadline_manufacturing.append(
-                    dicts_by_workcenter[idx_of_workcenter][job]['deadline_manufacturing'])
+                order_deadline_manufacturing.append(dicts_by_workcenter[idx_of_workcenter][job]['deadline_manufacturing'])
                 order_duration_expected.append(dicts_by_workcenter[idx_of_workcenter][job]['duration_expected'])
             order_all_info = {
                 'no': order_no,

@@ -25,7 +25,6 @@ class MrpProduction(models.Model):
     get_customer = fields.Char(string='Customer', store=True, compute='_find_customer')
     new_date_deadline = fields.Date(string='Date Deadline', store=True, compute='_cal_date_deadline')
 
-
     @api.depends('product_id')
     def _get_mold_in_use(self):
         for rec in self:
@@ -94,6 +93,7 @@ class MrpProduction(models.Model):
 
     def mo_no_priority(self, first_date_start):
         order_instance_dicts = self.order_input_data(first_date_start)
+        # order_instance_dicts = self.scheduling_planning_orders(first_date_start)
         for order_instance_dict in order_instance_dicts:
             i = 1
             for job in range(0, len(order_instance_dict)):
