@@ -7,8 +7,8 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='general_info']" position="after">
                 <page string="Associated Equipments" name="associated_equipments">
-                    <field name="equipment_ids" widget="one2many_tags">
-                            <tree name="equipment_tree_view" editable="bottom">
+                    <field name="equipment_ids" widget="one2many_tags" readonly="1">
+                            <tree name="equipment_tree_view">
                                 <field name="code"/>
                                 <field name="name"/>
                                 <field name="equipment_type_id"/>

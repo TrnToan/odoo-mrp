@@ -47,7 +47,8 @@ class ProductBomImport(models.TransientModel):
             product_code = self.get_code_from_component(line['BoM Lines/Component'])
             product_id = self.env['product.product'].search([('default_code', '=', product_code)], limit=1).id
             product_uom_id = self.env['uom.uom'].search([('name', '=', line['Unit of Measure'])], limit=1).id
-            workcenter_id = self.env['mrp.workcenter'].search([('name', '=', line['Operations/Work Center'])], limit=1).id
+            workcenter_id = self.env['mrp.workcenter'].search([('name', '=', line['Operations/Work Center'])],
+                                                              limit=1).id
             product_bom_ids.append(self.env['mrp.bom'].create({
                 'product_tmpl_id': product_tmpl_id,
                 'code': line['Reference'],
@@ -60,6 +61,8 @@ class ProductBomImport(models.TransientModel):
                 'operation_ids': [(0, 0, {
                     'name': line['Operations/Operation'],
                     'workcenter_id': workcenter_id,
+                    'alternative_workcenters': line['Operations/Alternative Workcenters'],
+                    'mold': line['Operations/Mold'],
                     'time_mode': line['Operations/Duration Computation'],
                     'time_cycle_manual': line['Operations/Manual Duration'],
                 })]

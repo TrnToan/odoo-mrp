@@ -74,10 +74,12 @@ class MrpWorkorder(models.Model):
             if rec.production_records:
                 runtime = sum((record.cycle_end_time - record.cycle_start_time).total_seconds()
                               for record in rec.production_records)
-                if self.state == 'done':
-                    wo_time = (rec.date_finished - rec.date_start).total_seconds()
+
+                if rec.state == 'done':
+                    wo_time = rec.duration*60
                 else:
                     wo_time = (datetime.utcnow() - rec.date_start).total_seconds()
+                print(wo_time)
                 rec.availability = runtime / wo_time
 
     @api.depends('production_records')
@@ -119,9 +121,13 @@ class MrpWorkorder(models.Model):
     @api.constrains('workcenter_id')
     def _check_workcenter_id(self):
         for rec in self:
-            valid_workcenter_ids = rec.operation_id.alternative_workcenters.split(',')
-            valid_workcenter_ids.append(rec.workcenter_id.code)
-            if rec.workcenter_id.name not in valid_workcenter_ids:
+            valid_workcenter_ids = [rec.workcenter_id.code]
+            workcenters_str = rec.operation_id.alternative_workcenters
+            if workcenters_str:
+                workcenter_ids = workcenters_str.split(',')
+                valid_workcenter_ids.append(workcenter_ids)
+
+            if rec.workcenter_id.code not in valid_workcenter_ids:
                 raise Exception('Invalid workcenter for this operation')
 
     def change_local_time(self, time):

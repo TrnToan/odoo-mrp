@@ -44,7 +44,6 @@ class MrpProduction(models.Model):
         current_solution = self.get_initial_solution(dict_per_workcenter)
         best_solution = current_solution
         best_object_value = float('inf')
-        best_neighbor_solution = None
         loop_idx = 0
         iterations = 100
         # excel data
@@ -52,6 +51,7 @@ class MrpProduction(models.Model):
         obj_val_list = []
         while loop_idx < iterations:
             neighbor_solutions = self.get_neighbor_solutions(current_solution)
+            best_neighbor_solution = None
 
             for neighbor_solution in neighbor_solutions:
                 if neighbor_solution not in tabu_list:
@@ -60,11 +60,20 @@ class MrpProduction(models.Model):
                         best_neighbor_solution = neighbor_solution
                         best_object_value = neighbor_object_val
 
-            current_solution = best_neighbor_solution
-            tabu_list.append(best_neighbor_solution)
             # prepare data for excel
             terminate_list.append(loop_idx)
             obj_val_list.append(best_object_value)
+
+            if best_neighbor_solution is None:
+                n_jobs = len(current_solution)
+                shuffled_solution = random.sample(current_solution, n_jobs)
+                current_solution = shuffled_solution
+                # current_solution[0], current_solution[-1] = current_solution[-1], current_solution[0]
+                loop_idx += 1
+                continue
+
+            current_solution = best_neighbor_solution
+            tabu_list.append(best_neighbor_solution)
 
             if len(tabu_list) > tenure:
                 tabu_list.pop(0)

@@ -19,3 +19,4 @@ from . import product_template_property
 from . import mrp_production_record
 from . import resource_network_connection
 from . import mrp_production_tabu_search_modify
+from . import mrp_bom_inherited

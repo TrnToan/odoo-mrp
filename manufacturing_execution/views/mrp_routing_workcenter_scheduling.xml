@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='workcenter_id']" position="after">
                 <field name="alternative_workcenters"/>
+                <field name="mold"/>
             </xpath>
         </field>
     </record>
@@ -18,6 +19,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='workcenter_id']" position="after">
                 <field name="alternative_workcenters"/>
+                <field name="mold"/>
             </xpath>
         </field>
     </record>

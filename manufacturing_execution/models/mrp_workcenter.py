@@ -10,6 +10,7 @@ class MrpWorkcenter(models.Model):
     area_id = fields.Many2one('mrp.area', string='Related Area')
     site_id = fields.Many2one(related='area_id.site_id', string='Related Site')
     enterprise_id = fields.Many2one(string='Enterprise', related='area_id.site_id.company_id')
+    # alternative_workcenter_ids = fields.Many2many('mrp.workcenter', compute='_get_alternative_workcenters')
 
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'Workcenter name must be unique'),
