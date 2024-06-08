@@ -12,8 +12,12 @@
                     <button name="button_cancel" type="object" string="Cancel"/>
                 </header>
             </xpath>
+            <xpath expr="//tree" position="attributes">
+                <attribute name="multi_edit">1</attribute>
+            </xpath>
         </field>
     </record>
+
     <record id="view_quotation_tree_inherited" model="ir.ui.view">
         <field name="name">quotation.tree.inherited</field>
         <field name="model">sale.order</field>
@@ -21,6 +25,17 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='amount_untaxed']" position="before">
                 <field name="sum_quantity"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_quotation_form_inherited" model="ir.ui.view">
+        <field name="name">quotation.form.inherited</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="commitment_date"/>
             </xpath>
         </field>
     </record>

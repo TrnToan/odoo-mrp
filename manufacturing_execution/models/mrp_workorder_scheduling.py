@@ -70,16 +70,14 @@ class MrpWorkorder(models.Model):
     @api.depends('production_records')
     def _compute_availability(self):
         """Thoi gian chay may ra san pham / Thoi gian du kien chay may"""
+        print('compute availability')
         for rec in self:
             if rec.production_records:
-                runtime = sum((record.cycle_end_time - record.cycle_start_time).total_seconds()
-                              for record in rec.production_records)
-
+                runtime = sum(record.injection_cycle for record in rec.production_records)
                 if rec.state == 'done':
-                    wo_time = rec.duration*60
+                    wo_time = rec.duration * 60
                 else:
                     wo_time = (datetime.utcnow() - rec.date_start).total_seconds()
-                print(wo_time)
                 rec.availability = runtime / wo_time
 
     @api.depends('production_records')
@@ -88,8 +86,7 @@ class MrpWorkorder(models.Model):
         for rec in self:
             if rec.production_records:
                 total_injection_time = sum(record.injection_time for record in rec.production_records)
-                total_injection_cycle = sum((record.cycle_end_time - record.cycle_start_time).total_seconds()
-                                            for record in rec.production_records)
+                total_injection_cycle = sum(record.injection_cycle for record in rec.production_records)
                 rec.performance = total_injection_time / total_injection_cycle
 
     @api.depends('production_records')

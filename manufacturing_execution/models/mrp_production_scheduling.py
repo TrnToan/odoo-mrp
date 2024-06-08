@@ -92,7 +92,6 @@ class MrpProduction(models.Model):
                 rec.weight_so = get_res_partner.weight
 
     def mo_no_priority(self, first_date_start):
-        # order_instance_dicts = self.order_input_data(first_date_start)
         order_instance_dicts = self.scheduling_planning_orders(first_date_start)
         for order_instance_dict in order_instance_dicts:
             priority = 1

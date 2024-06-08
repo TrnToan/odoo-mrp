@@ -27,6 +27,7 @@
         'views/mrp_area.xml',
         'views/res_company.xml',
         'views/product_management.xml',
+        'views/mrp_bom_inherited.xml',
     ],
     'demo': [],
     'qweb': [],

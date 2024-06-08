@@ -68,7 +68,6 @@ class MrpProduction(models.Model):
                 n_jobs = len(current_solution)
                 shuffled_solution = random.sample(current_solution, n_jobs)
                 current_solution = shuffled_solution
-                # current_solution[0], current_solution[-1] = current_solution[-1], current_solution[0]
                 loop_idx += 1
                 continue
 
@@ -87,6 +86,7 @@ class MrpProduction(models.Model):
 
     def scheduling_planning_orders(self, first_date_start):
         df_groupby_workcenter = self.get_data_groupby_workcenter()  # Lấy dữ liệu đầu vào
+        # df_groupby_workcenter_balanced = self.balance_workcenters(df_groupby_workcenter)
         dicts_by_workcenter = []
         solutions_by_workcenter = []
         for name, group in df_groupby_workcenter:
@@ -147,3 +147,35 @@ class MrpProduction(models.Model):
             idx_of_workcenter += 1
             # self.dictionary_display(order_instance_dict)
         return order_instance_dicts
+
+    def balance_workcenters(self, df_by_workcenter):
+        dfs = pd.DataFrame()
+        for name, group in df_by_workcenter:
+            alternative_workcenters_str = self.env['mrp.workcenter'].search([('name', '=', name)]).custom_alternative_workcenters
+            if alternative_workcenters_str:
+                alternative_workcenters = alternative_workcenters_str.split(',')
+                num_of_workcenters = len(alternative_workcenters) + 1
+                num_of_mo_per_workcenter = group.shape[0]   # get the number of MOs of the current main workcenter
+
+                # Calculate the number of jobs each workcenter will handle and the number of extra jobs
+                jobs_per_workcenter, extra_jobs = divmod(num_of_mo_per_workcenter, num_of_workcenters)
+
+                # Create a dictionary to store the number of jobs each workcenter will handle
+                jobs_distribution = {name: jobs_per_workcenter + extra_jobs}
+
+                # Assign jobs to the alternative workcenters
+                for alt_workcenter in alternative_workcenters:
+                    jobs_distribution[alt_workcenter] = jobs_per_workcenter
+                self.dictionary_display(jobs_distribution)
+                current_workcenter = 0
+                job_count = 0
+                for idx, row in group.iterrows():
+                    row['workcenter'] = list(jobs_distribution.keys())[current_workcenter]
+                    job_count += 1
+                    if job_count == jobs_distribution[list(jobs_distribution.keys())[current_workcenter]]:
+                        current_workcenter += 1
+                        job_count = 0
+            dfs = dfs.append(group, ignore_index=True)
+        df_by_wc = dfs.groupby('workcenter')
+        print(df_by_wc)
+        return df_by_wc
